@@ -191,6 +191,7 @@
             <div>
                 <span class="text-blue-700 font-semibold tracking-widest text-sm">LIVE UPDATES</span>
                 <h2 class="section-header">Latest News &amp; Developments</h2>
+                <p id="feed-status" class="text-xs text-slate-500 mt-1">Loading live feeds…</p>
             </div>
             
             <!-- Category Filters -->
@@ -293,8 +294,8 @@
                         <span class="font-semibold text-white">MediaLex</span>
                         <span class="text-xs px-2 py-0.5 bg-white/10 rounded">PROTOTYPE</span>
                     </div>
-                    <p class="max-w-md">This is a fully functional static prototype built with public information. 
-                    For production use, connect real-time RSS feeds from MLRC, SCOTUSblog, and court dockets.</p>
+                    <p class="max-w-md">News is pulled live from public RSS feeds (SCOTUSblog, First Amendment Watch, RCFP, EFF, The Hollywood Reporter)
+                    via rss2json, alongside curated stories and a hand-built case database.</p>
                 </div>
                 
                 <div class="text-xs space-y-1 md:text-right">
@@ -395,8 +396,28 @@
             document.documentElement.style.setProperty('--accent', '#1e40af');
         }
 
-        // Sample News Data (curated real + representative)
-        const newsData = [
+        // Live RSS feeds, converted to JSON by the free rss2json.com service.
+        // The free tier works without an API key but limits each feed to ~10 items.
+        const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
+        const RSS_FEEDS = [
+            { url: 'https://www.scotusblog.com/feed/', source: 'SCOTUSblog', category: 'first-amendment' },
+            { url: 'https://firstamendmentwatch.org/feed/', source: 'First Amendment Watch', category: 'first-amendment' },
+            { url: 'https://www.rcfp.org/feed/', source: 'Reporters Committee (RCFP)', category: 'media-law' },
+            { url: 'https://www.eff.org/rss/updates.xml', source: 'EFF Deeplinks', category: 'media-law' },
+            { url: 'https://www.hollywoodreporter.com/t/thr-esq/feed/', source: 'The Hollywood Reporter', category: 'entertainment' }
+        ];
+        const FEED_CACHE_KEY = 'medialex-live-news-v1';
+        const FEED_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+        const CATEGORY_LABELS = {
+            'first-amendment': 'First Amendment',
+            'media-law': 'Media Law',
+            'entertainment': 'Entertainment Law'
+        };
+
+        // Sample News Data (curated real + representative) — used as a fallback and
+        // shown alongside live items.
+        const curatedNews = [
             {
                 id: 1,
                 title: "SCOTUS Upholds Texas Age-Verification Law for Adult Websites",
@@ -486,6 +507,125 @@
                 tags: ["SLAPP", "Anti-SLAPP", "Press Freedom"]
             }
         ];
+
+        let newsData = [...curatedNews];
+
+        function escapeHTML(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function safeUrl(url) {
+            try {
+                const parsed = new URL(url);
+                return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '#';
+            } catch {
+                return '#';
+            }
+        }
+
+        function stripHTML(html) {
+            const doc = new DOMParser().parseFromString(html || '', 'text/html');
+            return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
+        }
+
+        function truncate(text, max = 320) {
+            return text.length > max ? text.slice(0, max).replace(/\s+\S*$/, '') + '…' : text;
+        }
+
+        // Refine the feed's default category using simple keyword matching
+        function classifyItem(text, fallback) {
+            const t = text.toLowerCase();
+            if (/(copyright|trademark|music|film|studio|streaming|hollywood|entertainment|royalt|licens|talent|celebrit)/.test(t)) return 'entertainment';
+            if (/(defamation|libel|journalist|reporter|press freedom|newsroom|subpoena|foia|public records|privacy|section 230)/.test(t)) return 'media-law';
+            if (/(first amendment|free speech|free expression|censorship|protest|religious liberty|book ban)/.test(t)) return 'first-amendment';
+            return fallback;
+        }
+
+        async function fetchFeed(feed) {
+            const res = await fetch(RSS2JSON_ENDPOINT + encodeURIComponent(feed.url));
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (data.status !== 'ok') throw new Error(data.message || 'Feed error');
+
+            return (data.items || []).map(item => {
+                const summary = truncate(stripHTML(item.description || item.content));
+                const title = stripHTML(item.title);
+                const category = classifyItem(`${title} ${summary} ${(item.categories || []).join(' ')}`, feed.category);
+                return {
+                    title,
+                    date: item.pubDate ? item.pubDate.replace(' ', 'T') + 'Z' : new Date().toISOString(),
+                    category,
+                    categoryLabel: CATEGORY_LABELS[category],
+                    summary,
+                    source: feed.source,
+                    link: item.link,
+                    tags: (item.categories || []).slice(0, 5).map(stripHTML).filter(Boolean),
+                    live: true
+                };
+            });
+        }
+
+        function readFeedCache() {
+            try {
+                const cached = JSON.parse(localStorage.getItem(FEED_CACHE_KEY));
+                if (cached && Date.now() - cached.savedAt < FEED_CACHE_TTL_MS) return cached;
+            } catch {}
+            return null;
+        }
+
+        function writeFeedCache(items) {
+            try {
+                localStorage.setItem(FEED_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), items }));
+            } catch {}
+        }
+
+        function setFeedStatus(text) {
+            const el = document.getElementById('feed-status');
+            if (el) el.textContent = text;
+        }
+
+        function applyNews(liveItems) {
+            const seen = new Set();
+            const merged = [...liveItems, ...curatedNews].filter(item => {
+                const key = item.link || item.title;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+            merged.sort((a, b) => new Date(b.date) - new Date(a.date));
+            newsData = merged.map((item, i) => ({ ...item, id: i + 1 }));
+            filterNews(currentNewsFilter);
+        }
+
+        async function loadLiveNews() {
+            const cached = readFeedCache();
+            if (cached) {
+                applyNews(cached.items);
+                setFeedStatus(`${cached.items.length} live stories · updated ${new Date(cached.savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`);
+                return;
+            }
+
+            const results = await Promise.allSettled(RSS_FEEDS.map(fetchFeed));
+            const liveItems = results.filter(r => r.status === 'fulfilled').flatMap(r => r.value);
+            const failed = results.filter(r => r.status === 'rejected').length;
+            results.forEach((r, i) => {
+                if (r.status === 'rejected') console.warn(`[MediaLex] Feed failed: ${RSS_FEEDS[i].source}`, r.reason);
+            });
+
+            if (liveItems.length === 0) {
+                setFeedStatus('Live feeds unavailable right now — showing curated stories.');
+                return;
+            }
+
+            writeFeedCache(liveItems);
+            applyNews(liveItems);
+            setFeedStatus(`${liveItems.length} live stories from ${RSS_FEEDS.length - failed} sources · updated just now`);
+        }
 
         // Sample Landmark + Recent Cases Database
         const casesData = [
@@ -605,23 +745,23 @@
                 card.className = `legal-card bg-white border border-slate-200 rounded-3xl p-6 flex flex-col h-full`;
                 card.innerHTML = `
                     <div class="flex justify-between items-start mb-4">
-                        <span class="category-tag ${getCategoryColor(item.category)}">${item.categoryLabel}</span>
-                        <span class="text-xs text-slate-500 font-mono">${formatDate(item.date)}</span>
+                        <span class="category-tag ${getCategoryColor(item.category)}">${escapeHTML(item.categoryLabel)}</span>
+                        <span class="text-xs text-slate-500 font-mono">${item.live ? '<span class="text-red-600 font-semibold mr-1">● LIVE</span>' : ''}${formatDate(item.date)}</span>
                     </div>
                     
-                    <h3 class="font-semibold text-[15.5px] leading-tight tracking-tight mb-3 line-clamp-3">${item.title}</h3>
+                    <h3 class="font-semibold text-[15.5px] leading-tight tracking-tight mb-3 line-clamp-3">${escapeHTML(item.title)}</h3>
                     
-                    <p class="text-sm text-slate-600 line-clamp-3 flex-grow">${item.summary}</p>
+                    <p class="text-sm text-slate-600 line-clamp-3 flex-grow">${escapeHTML(item.summary)}</p>
                     
                     <div class="mt-5 pt-4 border-t flex items-center justify-between text-xs">
-                        <div class="text-slate-500">${item.source}</div>
+                        <div class="text-slate-500">${escapeHTML(item.source)}</div>
                         <div class="flex items-center gap-x-1">
                             <button onclick="showNewsModal(${item.id}); event.stopImmediatePropagation();" 
                                     class="font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-x-1">
                                 <span>Details</span> 
                                 <i class="fa-solid fa-chevron-right text-[10px]"></i>
                             </button>
-                            <a href="${item.link}" target="_blank" onclick="event.stopImmediatePropagation();" 
+                            <a href="${escapeHTML(safeUrl(item.link))}" target="_blank" rel="noopener noreferrer" onclick="event.stopImmediatePropagation();" 
                                class="ml-2 text-blue-700 hover:text-blue-800">
                                 <i class="fa-solid fa-external-link-alt"></i>
                             </a>
@@ -754,21 +894,21 @@
                     <div onclick="event.stopImmediatePropagation()" class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden">
                         <div class="p-8">
                             <div class="flex justify-between">
-                                <span class="category-tag ${getCategoryColor(item.category)}">${item.categoryLabel}</span>
+                                <span class="category-tag ${getCategoryColor(item.category)}">${escapeHTML(item.categoryLabel)}</span>
                                 <span class="text-sm text-slate-500">${formatDate(item.date)}</span>
                             </div>
                             
-                            <h2 class="text-2xl font-bold tracking-tight mt-4 mb-4">${item.title}</h2>
+                            <h2 class="text-2xl font-bold tracking-tight mt-4 mb-4">${escapeHTML(item.title)}</h2>
                             
                             <div class="prose prose-slate max-w-none text-[15px]">
-                                <p>${item.summary}</p>
-                                <p class="mt-4 text-sm"><strong>Key Tags:</strong> ${item.tags.join(' • ')}</p>
+                                <p>${escapeHTML(item.summary)}</p>
+                                ${item.tags && item.tags.length ? `<p class="mt-4 text-sm"><strong>Key Tags:</strong> ${escapeHTML(item.tags.join(' • '))}</p>` : ''}
                             </div>
                         </div>
                         
                         <div class="px-8 py-5 bg-slate-50 border-t flex items-center justify-between text-sm">
-                            <div class="text-slate-600">Source: <span class="font-medium">${item.source}</span></div>
-                            <a href="${item.link}" target="_blank" class="font-semibold flex items-center gap-x-2 text-blue-700">
+                            <div class="text-slate-600">Source: <span class="font-medium">${escapeHTML(item.source)}</span></div>
+                            <a href="${escapeHTML(safeUrl(item.link))}" target="_blank" rel="noopener noreferrer" class="font-semibold flex items-center gap-x-2 text-blue-700">
                                 Read full coverage <i class="fa-solid fa-external-link-alt ml-1"></i>
                             </a>
                         </div>
@@ -930,6 +1070,7 @@
             // Render initial content
             renderNews();
             renderCases();
+            loadLiveNews();
             
             // Setup interactions
             setupGlobalSearch();
