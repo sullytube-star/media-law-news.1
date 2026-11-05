@@ -3,7 +3,11 @@ import { XMLParser } from 'fast-xml-parser'
 
 // Every feed the site is allowed to load. The pages pick the feeds they need
 // from the cached snapshot by URL.
-export const FEEDS: { url: string; source: string }[] = [
+// `format: 'mandell-html'` marks a site with no RSS feed whose news listing
+// page is scraped instead.
+type FeedFormat = 'rss' | 'mandell-html'
+
+export const FEEDS: { url: string; source: string; format?: FeedFormat }[] = [
   { url: 'https://www.scotusblog.com/feed/', source: 'SCOTUSblog' },
   { url: 'https://firstamendmentwatch.org/feed/', source: 'First Amendment Watch' },
   { url: 'https://www.rcfp.org/feed/', source: 'Reporters Committee (RCFP)' },
@@ -13,6 +17,7 @@ export const FEEDS: { url: string; source: string }[] = [
   { url: 'https://www.insideprivacy.com/feed/', source: 'Covington Inside Privacy' },
   { url: 'https://eyeonprivacy.sheppardmullinplatform.com/feed/', source: 'Sheppard Mullin Eye on Privacy' },
   { url: 'https://harvardlawreview.org/feed/', source: 'Harvard Law Review' },
+  { url: 'https://www.mandellpc.com/news', source: 'Mandell P.C.', format: 'mandell-html' },
 ]
 
 const MAX_ITEMS_PER_FEED = 25
@@ -131,6 +136,10 @@ function parseFeed(xml: string): FeedItem[] {
     throw new Error('Response is not an RSS or Atom feed')
   }
 
+  return finishItems(items)
+}
+
+function finishItems(items: FeedItem[]): FeedItem[] {
   return items
     .filter((item) => item.title && /^https?:\/\//i.test(item.link))
     .map((item) => ({
@@ -143,7 +152,32 @@ function parseFeed(xml: string): FeedItem[] {
     .slice(0, MAX_ITEMS_PER_FEED)
 }
 
-async function fetchOne(url: string): Promise<FeedItem[]> {
+// Mandell P.C. (mandellpc.com/news) has no RSS feed. Each story on the
+// listing page is a card: a link wrapping an <h2> title, a <p> with the date,
+// then a <div> with the summary paragraphs.
+function parseMandellNews(html: string, pageUrl: string): FeedItem[] {
+  const card =
+    /<a\b[^>]*href="(\/news\/[^"#?]+)"[^>]*>\s*<h2\b[^>]*>([\s\S]*?)<\/h2>\s*<\/a>\s*<p\b[^>]*>([\s\S]*?)<\/p>\s*<div\b[^>]*>([\s\S]*?)<\/div>/gi
+  const items: FeedItem[] = []
+  const seen = new Set<string>()
+  for (const m of html.matchAll(card)) {
+    const link = new URL(m[1], pageUrl).toString()
+    if (seen.has(link)) continue
+    seen.add(link)
+    items.push({
+      title: plainText(m[2]),
+      link,
+      pubDate: toIso(plainText(m[3])),
+      author: 'Mandell P.C.',
+      description: plainText(m[4]),
+      categories: [],
+    })
+  }
+  if (!items.length) throw new Error('No news stories found on the page')
+  return finishItems(items)
+}
+
+async function fetchOne(url: string, format: FeedFormat = 'rss'): Promise<FeedItem[]> {
   const res = await fetch(url, {
     redirect: 'follow',
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
@@ -155,7 +189,8 @@ async function fetchOne(url: string): Promise<FeedItem[]> {
     },
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  return parseFeed(await res.text())
+  const body = await res.text()
+  return format === 'mandell-html' ? parseMandellNews(body, url) : parseFeed(body)
 }
 
 function store() {
@@ -174,9 +209,9 @@ export async function refreshFeeds(): Promise<Snapshot> {
   const now = new Date().toISOString()
 
   const feeds = await Promise.all(
-    FEEDS.map(async ({ url, source }): Promise<FeedResult> => {
+    FEEDS.map(async ({ url, source, format }): Promise<FeedResult> => {
       try {
-        const items = await fetchOne(url)
+        const items = await fetchOne(url, format)
         return { url, source, status: 'ok', fetchedAt: now, checkedAt: now, items }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
