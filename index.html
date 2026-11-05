@@ -91,6 +91,7 @@
                 <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
                     <a href="#news" class="hover:text-blue-700 transition-colors">News Feed</a>
                     <a href="#cases" class="hover:text-blue-700 transition-colors">Case Database</a>
+                    <a href="#resources" class="hover:text-blue-700 transition-colors">Resources</a>
                 </div>
 
                 <div class="flex items-center gap-x-3">
@@ -195,6 +196,7 @@
                 <button onclick="filterNews('first-amendment')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="first-amendment">First Amendment</button>
                 <button onclick="filterNews('media-law')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="media-law">Media Law</button>
                 <button onclick="filterNews('entertainment')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="entertainment">Entertainment Law</button>
+                <button onclick="filterNews('defamation-privacy')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="defamation-privacy">Defamation &amp; Privacy</button>
             </div>
         </div>
 
@@ -229,6 +231,52 @@
 
             <div id="cases-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Resources & Sources -->
+    <div id="resources" class="max-w-screen-2xl mx-auto px-8 py-14">
+        <div class="max-w-4xl">
+            <h2 class="section-header mb-3">Primary Sources &amp; Partners</h2>
+            <p class="text-slate-600 mb-8">Media Law News aggregates from these trusted organizations and official court records.</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <a href="https://medialaw.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-newspaper text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Media Law Resource Center</div>
+                        <div class="text-xs text-slate-500">MLRC • MediaLawDaily</div>
+                    </div>
+                </a>
+                <a href="https://rcfp.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-gavel text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Reporters Committee</div>
+                        <div class="text-xs text-slate-500">RCFP • First Amendment Handbook</div>
+                    </div>
+                </a>
+                <a href="https://www.law360.com/media" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-tv text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Law360 Media &amp; Entertainment</div>
+                        <div class="text-xs text-slate-500">Premium legal news</div>
+                    </div>
+                </a>
+                <a href="https://knightcolumbia.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-globe text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Knight First Amendment Institute</div>
+                        <div class="text-xs text-slate-500">Columbia University</div>
+                    </div>
+                </a>
+                <a href="https://www.supremecourt.gov/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-landmark text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">U.S. Supreme Court</div>
+                        <div class="text-xs text-slate-500">Official Opinions</div>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
@@ -348,7 +396,9 @@
             { url: 'https://firstamendmentwatch.org/feed/', source: 'First Amendment Watch', category: 'first-amendment' },
             { url: 'https://www.rcfp.org/feed/', source: 'Reporters Committee (RCFP)', category: 'media-law' },
             { url: 'https://www.eff.org/rss/updates.xml', source: 'EFF Deeplinks', category: 'media-law' },
-            { url: 'https://www.hollywoodreporter.com/t/thr-esq/feed/', source: 'The Hollywood Reporter', category: 'entertainment' }
+            { url: 'https://www.hollywoodreporter.com/t/thr-esq/feed/', source: 'The Hollywood Reporter', category: 'entertainment' },
+            { url: 'https://defamationlawblog.com/feed', source: 'California Defamation Law Blog', category: 'defamation-privacy' },
+            { url: 'https://iapp.org/rss/news.xml', source: 'IAPP Daily News', category: 'defamation-privacy' }
         ];
         const FEED_CACHE_KEY = 'media-law-news-live-v1';
         const FEED_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
@@ -356,7 +406,8 @@
         const CATEGORY_LABELS = {
             'first-amendment': 'First Amendment',
             'media-law': 'Media Law',
-            'entertainment': 'Entertainment Law'
+            'entertainment': 'Entertainment Law',
+            'defamation-privacy': 'Defamation & Privacy'
         };
 
         // Sample News Data (curated real + representative) — used as a fallback and
@@ -368,7 +419,7 @@
                 date: "2025-06-27",
                 category: "first-amendment",
                 categoryLabel: "First Amendment",
-                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult speech.",
+                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult speech and age-based content restrictions.",
                 source: "Supreme Court / FIRE",
                 link: "https://www.supremecourt.gov/opinions/24pdf/23-1122_new.pdf",
                 tags: ["SCOTUS", "Adult Content", "Age Verification"]
@@ -484,6 +535,7 @@
         // Refine the feed's default category using simple keyword matching
         function classifyItem(text, fallback) {
             const t = text.toLowerCase();
+            if (/(defamation|libel|slander|privacy|reputation|anti-slapp|false light|intrusion|public disclosure)/.test(t)) return 'defamation-privacy';
             if (/(copyright|trademark|music|film|studio|streaming|hollywood|entertainment|royalt|licens|talent|celebrit)/.test(t)) return 'entertainment';
             if (/(defamation|libel|journalist|reporter|press freedom|newsroom|subpoena|foia|public records|privacy|section 230)/.test(t)) return 'media-law';
             if (/(first amendment|free speech|free expression|censorship|protest|religious liberty|book ban)/.test(t)) return 'first-amendment';
@@ -760,6 +812,7 @@
             if (category === 'first-amendment') return 'bg-violet-100 text-violet-700';
             if (category === 'media-law') return 'bg-amber-100 text-amber-700';
             if (category === 'entertainment') return 'bg-emerald-100 text-emerald-700';
+            if (category === 'defamation-privacy') return 'bg-rose-100 text-rose-700';
             return 'bg-slate-100 text-slate-700';
         }
 
