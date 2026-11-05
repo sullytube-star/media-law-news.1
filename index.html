@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Playfair+Display:wght@700&amp;display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap');
         
         :root {
             --primary: #1e3a8a;
@@ -169,19 +169,19 @@
         <div class="max-w-screen-2xl mx-auto px-8 py-5">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
                 <div>
-                    <div class="text-3xl font-semibold tracking-tighter stat-number">1,284</div>
+                    <div id="stats-cases" class="text-3xl font-semibold tracking-tighter stat-number">0</div>
                     <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">CASES TRACKED</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-semibold tracking-tighter stat-number">142</div>
+                    <div id="stats-new-2026" class="text-3xl font-semibold tracking-tighter stat-number">0</div>
                     <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">NEW IN 2026</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-semibold tracking-tighter stat-number">47</div>
+                    <div id="stats-scotus" class="text-3xl font-semibold tracking-tighter stat-number">0</div>
                     <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">SUPREME COURT RULINGS</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-semibold tracking-tighter">89</div>
+                    <div id="stats-sources" class="text-3xl font-semibold tracking-tighter">0</div>
                     <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">ACTIVE SOURCES</div>
                 </div>
             </div>
@@ -380,6 +380,7 @@
                     <label class="text-xs font-semibold tracking-widest text-slate-500">INTEREST AREAS</label>
                     <div class="flex flex-wrap gap-2 mt-1.5">
                         <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> First Amendment</label>
+                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> Media Law</label>
                         <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> Entertainment / Copyright</label>
                         <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" class="accent-blue-900"> Defamation &amp; Privacy</label>
                     </div>
@@ -427,7 +428,7 @@
                 date: "2025-06-27",
                 category: "first-amendment",
                 categoryLabel: "First Amendment",
-                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult entertainment and age gate enforcement.",
+                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult speech and age-based content restrictions.",
                 source: "Supreme Court / FIRE",
                 link: "https://www.supremecourt.gov/opinions/24pdf/23-1122_new.pdf",
                 tags: ["SCOTUS", "Adult Content", "Age Verification"]
@@ -438,7 +439,7 @@
                 date: "2026-03-25",
                 category: "entertainment",
                 categoryLabel: "Entertainment Law",
-                summary: "In a unanimous decision, the Court held that Cox Communications was not contributorily liable for copyright infringement simply because it knew some subscribers were pirating copyrighted material.",
+                summary: "In a unanimous decision, the Court held that Cox Communications was not contributorily liable for copyright infringement simply because it knew some subscribers were pirating content.",
                 source: "SCOTUSblog / Law360",
                 link: "https://www.scotusblog.com/cases/cox-communications-inc-v-sony-music-entertainment/",
                 tags: ["Copyright", "ISP Liability", "Section 512"]
@@ -449,7 +450,7 @@
                 date: "2026-03-31",
                 category: "first-amendment",
                 categoryLabel: "First Amendment",
-                summary: "Chiles v. Salazar: 8-1 decision holds that Colorado’s ban on conversion therapy for minors, as applied to licensed counselor’s talk therapy, constitutes viewpoint discrimination.",
+                summary: "A 2026 decision striking down a state ban on conversion therapy emphasized major constitutional problems with viewpoint-based restrictions on speech and counseling.",
                 source: "SCOTUS / First Amendment Encyclopedia",
                 link: "https://www.supremecourt.gov/opinions/25pdf/24-539_fd9g.pdf",
                 tags: ["Professional Speech", "Viewpoint Discrimination", "LGBTQ+"]
@@ -482,7 +483,7 @@
                 date: "2026-03-26",
                 category: "entertainment",
                 categoryLabel: "Entertainment Law",
-                summary: "While Sony and other labels secured significant damages at trial, the Supreme Court’s Cox decision significantly limits how far copyright owners can reach upstream to hold service providers liable.",
+                summary: "While Sony and other labels secured significant damages at trial, the Supreme Court narrowed how far copyright owners can reach upstream to impose liability.",
                 source: "Law360 Media",
                 link: "https://www.law360.com/media",
                 tags: ["Music Copyright", "Secondary Liability", "DMCA"]
@@ -592,6 +593,27 @@
             if (el) el.textContent = text;
         }
 
+        function updateStats() {
+            const caseCount = casesData.length;
+            const new2026 = casesData.filter(item => {
+                const year = new Date(item.date).getFullYear();
+                return year === 2026;
+            }).length;
+            const scotusCount = casesData.filter(item => (
+                item.court && item.court.toLowerCase().includes('supreme court')
+            )).length;
+
+            const casesEl = document.getElementById('stats-cases');
+            const newEl = document.getElementById('stats-new-2026');
+            const scotusEl = document.getElementById('stats-scotus');
+            const sourcesEl = document.getElementById('stats-sources');
+
+            if (casesEl) casesEl.textContent = caseCount;
+            if (newEl) newEl.textContent = new2026;
+            if (scotusEl) scotusEl.textContent = scotusCount;
+            if (sourcesEl) sourcesEl.textContent = activeSourceCount;
+        }
+
         function applyNews(liveItems) {
             const seen = new Set();
             const merged = [...liveItems, ...curatedNews].filter(item => {
@@ -605,10 +627,14 @@
             filterNews(currentNewsFilter);
         }
 
+        let activeSourceCount = 0;
+
         async function loadLiveNews() {
             const cached = readFeedCache();
             if (cached) {
+                activeSourceCount = RSS_FEEDS.length;
                 applyNews(cached.items);
+                updateStats();
                 setFeedStatus(`${cached.items.length} live stories · updated ${new Date(cached.savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`);
                 return;
             }
@@ -616,18 +642,22 @@
             const results = await Promise.allSettled(RSS_FEEDS.map(fetchFeed));
             const liveItems = results.filter(r => r.status === 'fulfilled').flatMap(r => r.value);
             const failed = results.filter(r => r.status === 'rejected').length;
+            activeSourceCount = RSS_FEEDS.length - failed;
             results.forEach((r, i) => {
                 if (r.status === 'rejected') console.warn(`[Media Law News] Feed failed: ${RSS_FEEDS[i].source}`, r.reason);
             });
 
             if (liveItems.length === 0) {
+                activeSourceCount = 0;
+                updateStats();
                 setFeedStatus('Live feeds unavailable right now — showing curated stories.');
                 return;
             }
 
             writeFeedCache(liveItems);
             applyNews(liveItems);
-            setFeedStatus(`${liveItems.length} live stories from ${RSS_FEEDS.length - failed} sources · updated just now`);
+            updateStats();
+            setFeedStatus(`${liveItems.length} live stories from ${activeSourceCount} sources · updated just now`);
         }
 
         // Sample Landmark + Recent Cases Database
@@ -666,7 +696,7 @@
                 category: "entertainment",
                 categoryLabel: "Entertainment Law",
                 court: "U.S. Supreme Court",
-                holding: "Internet service providers are not contributorily liable for users’ copyright infringement merely by providing service with knowledge that some users infringe. Liability remains limited absent direct participation or specific inducement.",
+                holding: "Internet service providers are not contributorily liable for users’ copyright infringement merely by providing service with knowledge that some users infringe.",
                 issues: ["Copyright Infringement", "Contributory Liability", "ISP Liability"],
                 impact: "Major win for tech platforms and broadband providers. Limits reach of copyright enforcement upstream.",
                 link: "https://www.scotusblog.com/cases/cox-communications-inc-v-sony-music-entertainment/"
@@ -793,7 +823,6 @@
         function filterNews(filter) {
             currentNewsFilter = filter;
             
-            // Update active button styles
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('filter-active', 'bg-blue-900', 'text-white');
                 btn.classList.add('hover:bg-slate-100');
@@ -810,7 +839,6 @@
                 filtered = newsData.filter(item => item.category === filter);
             }
             
-            // Apply global search if active
             const searchTerm = document.getElementById('global-search').value.toLowerCase().trim();
             if (searchTerm) {
                 filtered = filtered.filter(item => 
@@ -865,7 +893,6 @@
             document.getElementById('modal-court').textContent = item.court;
             document.getElementById('modal-link').href = item.link;
 
-            // Issues tags
             const issuesContainer = document.getElementById('modal-issues');
             issuesContainer.innerHTML = '';
             item.issues.forEach(issue => {
@@ -928,7 +955,6 @@
             searchInput.addEventListener('input', () => {
                 const term = searchInput.value.toLowerCase().trim();
                 
-                // Filter news
                 let filteredNews = newsData;
                 if (currentNewsFilter !== 'all') {
                     filteredNews = newsData.filter(n => n.category === currentNewsFilter);
@@ -942,7 +968,6 @@
                 }
                 renderNews(filteredNews);
 
-                // Filter cases
                 let filteredCases = casesData;
                 if (term) {
                     filteredCases = casesData.filter(c => 
@@ -954,7 +979,6 @@
                 renderCases(filteredCases);
             });
 
-            // Case search separate
             const caseSearch = document.getElementById('case-search');
             if (caseSearch) {
                 caseSearch.addEventListener('input', () => {
@@ -995,17 +1019,18 @@
                             class="mt-6 px-8 py-3 bg-slate-900 text-white rounded-3xl text-sm font-semibold">Close</button>
                 </div>
             `;
-            
-            // In a real app, this would POST to your backend or email service
             setTimeout(() => {
-                // Could auto-close or show confirmation
             }, 3000);
         }
 
         function setupFilterButtons() {
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', () => filterNews(btn.dataset.filter));
+                btn.addEventListener('click', () => {
+                });
             });
+            
+            const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+            if (allBtn) allBtn.classList.add('filter-active', 'bg-blue-900', 'text-white');
         }
 
         function toggleMobileMenu() {
@@ -1014,7 +1039,7 @@
             nav.innerHTML = `
                 <div class="bg-white w-72 h-full p-6" onclick="event.stopImmediatePropagation()">
                     <div class="flex justify-between mb-8">
-                        <span class="font-bold text-2xl">Media Law News</span>
+                        <span class="font-bold text-2xl">MediaLex</span>
                         <button onclick="this.closest('.fixed').remove()" class="text-3xl">&times;</button>
                     </div>
                     
@@ -1033,7 +1058,6 @@
             document.body.appendChild(nav);
         }
 
-        // Download data
         function downloadData() {
             const data = {
                 news: newsData,
@@ -1046,46 +1070,36 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'media-law-news_data_export.json';
+            a.download = 'medialex_data_export.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
-        // Initialize everything
         function initialize() {
             initializeTailwind();
-            
-            // Render initial content
             renderNews();
             renderCases();
+            updateStats();
             loadLiveNews();
-            
-            // Setup interactions
             setupGlobalSearch();
             setupFilterButtons();
             
-            // Make filter buttons have proper initial state
             const allFilterBtn = document.querySelector('.filter-btn[data-filter="all"]');
             if (allFilterBtn) {
                 allFilterBtn.classList.add('bg-blue-900', 'text-white', 'filter-active');
             }
 
-            // Bonus: Keyboard shortcut for search
             document.addEventListener('keydown', function(e) {
                 if (e.key === '/' && document.activeElement.tagName === 'BODY') {
                     e.preventDefault();
                     document.getElementById('global-search').focus();
                 }
             });
-
-            // Easter egg / tip
-            console.log('%c[Media Law News] Static prototype ready. Press "/" to focus search. All data is public-domain curated.', 'color:#64748b');
         }
 
-        // Boot app
-        window.onload = initialize;
+        initialize();
     </script>
 </body>
 </html>
