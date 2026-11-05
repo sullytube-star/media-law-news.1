@@ -1,0 +1,10 @@
+{
+  "name": "media-law-news",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.7",
+    "@netlify/functions": "^6.1.0",
+    "fast-xml-parser": "^5.12.0"
+  }
+}

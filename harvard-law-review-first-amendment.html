@@ -27,7 +27,7 @@
 
   <script>
     const RSS_URL = 'https://harvardlawreview.org/feed/';
-    const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
+    const FEEDS_ENDPOINT = '/api/feeds'; // feeds are fetched and cached on the server
     const TOPIC_TERMS = /first amendment|free speech|freedom of speech|free expression|freedom of expression|press freedom|freedom of the press|speech clause|expressive conduct|prior restraint|censorship/i;
     const articlesEl = document.getElementById('articles');
     const statusEl = document.getElementById('status');
@@ -41,14 +41,15 @@
       statusEl.textContent = 'Loading Harvard Law Review articles…';
       articlesEl.replaceChildren();
       try {
-        const response = await fetch(RSS2JSON_ENDPOINT + encodeURIComponent(RSS_URL));
+        const response = await fetch(FEEDS_ENDPOINT);
         if (!response.ok) throw new Error(`Feed request failed (${response.status})`);
         const data = await response.json();
-        if (data.status !== 'ok') throw new Error(data.message || 'Feed is unavailable');
+        const feed = (data.feeds || []).find(f => f.url === RSS_URL);
+        if (!feed || !feed.items || !feed.items.length) throw new Error((feed && feed.message) || 'Feed is unavailable');
 
-        const matches = (data.items || []).map(item => ({
+        const matches = feed.items.map(item => ({
           title: plainText(item.title),
-          summary: plainText(item.description || item.content),
+          summary: plainText(item.description),
           date: item.pubDate || '',
           link: item.link
         })).filter(item => TOPIC_TERMS.test(`${item.title} ${item.summary}`));

@@ -63,7 +63,7 @@
 
 <script>
 const RSS_FEEDS = [
-  "https://scotusblog.com/feed/",
+  "https://www.scotusblog.com/feed/",
   "https://firstamendmentwatch.org/feed/",
   "https://www.rcfp.org/feed/",
   "https://www.eff.org/rss/updates.xml"
@@ -178,17 +178,16 @@ function renderArchive() {
 
 async function loadArchive() {
   try {
-    for (const feed of RSS_FEEDS) {
-      const url =
-        "https://api.rss2json.com/v1/api.json?rss_url=" +
-        encodeURIComponent(feed);
+    // Feeds are fetched and cached on the server; see /api/feeds.
+    const response = await fetch("/api/feeds");
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const byUrl = new Map((data.feeds || []).map(feed => [feed.url, feed]));
 
-      const response = await fetch(url);
-      if (!response.ok) continue;
-
-      const data = await response.json();
-      if (data.items) {
-        archiveArticles.push(...data.items.slice(0, 20));
+    for (const feedUrl of RSS_FEEDS) {
+      const feed = byUrl.get(feedUrl);
+      if (feed && feed.items) {
+        archiveArticles.push(...feed.items);
       }
     }
 
