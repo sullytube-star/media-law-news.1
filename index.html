@@ -90,6 +90,7 @@
                 <!-- Desktop Nav -->
                 <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
                     <a href="#news" class="hover:text-blue-700 transition-colors">News Feed</a>
+                    <a href="google-news.html" class="hover:text-blue-700 transition-colors">Google News Daily</a>
                     <a href="#cases" class="hover:text-blue-700 transition-colors">Case Database</a>
                     <a href="#resources" class="hover:text-blue-700 transition-colors">Resources</a>
                 </div>
@@ -210,6 +211,11 @@
        class="text-sm font-semibold px-6 py-3 border border-slate-300 hover:bg-white rounded-3xl inline-flex items-center gap-x-2">
         <span>View Full News Archive</span>
         <i class="fa-solid fa-external-link-alt text-xs"></i>
+    </a>
+    <a href="google-news.html"
+       class="ml-2 text-sm font-semibold px-6 py-3 border border-slate-300 hover:bg-white rounded-3xl inline-flex items-center gap-x-2">
+        <span>Today's Top 100 from Google News</span>
+        <i class="fa-brands fa-google text-xs"></i>
     </a>
 </div>
 
@@ -1054,6 +1060,7 @@
             menu.className = 'md:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-200 p-6 flex flex-col gap-4 text-sm font-medium';
             menu.innerHTML = `
                 <a href="#news" onclick="this.parentElement.remove()">News Feed</a>
+                <a href="google-news.html">Google News Daily</a>
                 <a href="#cases" onclick="this.parentElement.remove()">Case Database</a>
             `;
             document.querySelector('nav').appendChild(menu);

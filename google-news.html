@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google News Daily | Media Law News</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<header class="bg-white border-b">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="index.html" class="text-2xl font-bold text-blue-900">Media Law News</a>
+        <a href="index.html" class="text-blue-600 hover:underline">← Back to Home</a>
+    </div>
+</header>
+
+<section class="max-w-7xl mx-auto px-6 py-10">
+    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-blue-700">Google News · Daily</p>
+    <h1 class="mt-2 text-4xl font-bold mb-3">Today's Top 100</h1>
+    <p class="text-slate-600 mb-6 max-w-3xl">
+        Up to 100 stories from the past 24 hours, pulled from Google News once a day across
+        First Amendment, media law, entertainment law, defamation and privacy.
+    </p>
+
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <div class="grid gap-3 sm:grid-cols-3 mb-4">
+            <div>
+                <label for="search" class="block text-sm font-medium text-slate-700 mb-1">Search headlines</label>
+                <input id="search" type="search" placeholder="Search by headline or publisher..."
+                       class="w-full rounded-lg border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label for="topic" class="block text-sm font-medium text-slate-700 mb-1">Topic</label>
+                <select id="topic" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="all">All topics</option>
+                    <option>First Amendment</option>
+                    <option>Media Law</option>
+                    <option>Entertainment Law</option>
+                    <option>Defamation</option>
+                    <option>Privacy</option>
+                </select>
+            </div>
+            <div>
+                <label for="day" class="block text-sm font-medium text-slate-700 mb-1">Day</label>
+                <select id="day" class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Latest</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="counts" class="flex flex-wrap gap-2 mb-2"></div>
+        <p id="status" class="text-sm text-slate-500 mb-4" aria-live="polite">Loading today's results…</p>
+
+        <ol id="results" class="divide-y"></ol>
+    </div>
+
+    <p class="mt-6 text-xs text-slate-500">
+        Headlines and links are provided by Google News and open on the publisher's site.
+    </p>
+</section>
+
+<script>
+const resultsEl = document.getElementById('results');
+const statusEl = document.getElementById('status');
+const countsEl = document.getElementById('counts');
+const searchEl = document.getElementById('search');
+const topicEl = document.getElementById('topic');
+const dayEl = document.getElementById('day');
+let snapshot = null;
+
+function safeUrl(url) {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' || u.protocol === 'http:' ? u.href : '#';
+  } catch { return '#'; }
+}
+
+function render() {
+  resultsEl.replaceChildren();
+  countsEl.replaceChildren();
+  if (!snapshot) return;
+
+  for (const [topic, n] of Object.entries(snapshot.counts || {})) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'rounded-full px-3 py-1 text-xs font-medium ' +
+      (topicEl.value === topic ? 'bg-blue-900 text-white' : 'bg-blue-50 text-blue-800 hover:bg-blue-100');
+    chip.textContent = `${topic} · ${n}`;
+    chip.addEventListener('click', () => {
+      topicEl.value = topicEl.value === topic ? 'all' : topic;
+      render();
+    });
+    countsEl.append(chip);
+  }
+
+  const q = searchEl.value.trim().toLowerCase();
+  const topic = topicEl.value;
+  const items = snapshot.items.filter(item =>
+    (topic === 'all' || item.topics.includes(topic)) &&
+    (!q || `${item.title} ${item.source}`.toLowerCase().includes(q))
+  );
+
+  const pulled = new Date(snapshot.updatedAt);
+  statusEl.textContent = `Showing ${items.length} of ${snapshot.total} stories · pulled ${pulled.toLocaleString()}`;
+
+  if (!items.length) {
+    const li = document.createElement('li');
+    li.className = 'py-4 text-slate-600';
+    li.textContent = 'No stories match your search and topic.';
+    resultsEl.append(li);
+    return;
+  }
+
+  items.forEach((item, i) => {
+    const li = document.createElement('li');
+    li.className = 'py-4 flex gap-4';
+
+    const num = document.createElement('span');
+    num.className = 'w-8 shrink-0 text-right font-mono text-sm text-slate-400 pt-0.5';
+    num.textContent = i + 1;
+
+    const body = document.createElement('div');
+    const a = document.createElement('a');
+    a.href = safeUrl(item.link);
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.className = 'text-blue-700 font-semibold hover:underline';
+    a.textContent = item.title;
+
+    const meta = document.createElement('div');
+    meta.className = 'mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500';
+    const source = document.createElement('span');
+    source.textContent = item.source || 'Unknown publisher';
+    meta.append(source);
+    const date = new Date(item.pubDate);
+    if (!Number.isNaN(date.getTime())) {
+      const d = document.createElement('span');
+      d.textContent = '· ' + date.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+      meta.append(d);
+    }
+    for (const t of item.topics) {
+      const tag = document.createElement('span');
+      tag.className = 'rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700';
+      tag.textContent = t;
+      meta.append(tag);
+    }
+
+    body.append(a, meta);
+    li.append(num, body);
+    resultsEl.append(li);
+  });
+}
+
+async function load(day) {
+  statusEl.textContent = 'Loading…';
+  try {
+    const res = await fetch('/api/google-news' + (day ? `?date=${encodeURIComponent(day)}` : ''));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    snapshot = await res.json();
+    render();
+  } catch {
+    snapshot = null;
+    render();
+    statusEl.textContent = 'Unable to load Google News results right now. Please try again shortly.';
+  }
+}
+
+async function loadDays() {
+  try {
+    const res = await fetch('/api/google-news?days');
+    if (!res.ok) return;
+    const { days } = await res.json();
+    for (const d of days) {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = new Date(d + 'T12:00:00Z').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      dayEl.append(opt);
+    }
+  } catch {}
+}
+
+searchEl.addEventListener('input', render);
+topicEl.addEventListener('change', render);
+dayEl.addEventListener('change', () => load(dayEl.value));
+load().then(loadDays);
+</script>
+</body>
+</html>
