@@ -125,7 +125,10 @@ This is a fully functional static prototype built with public information. For p
             <div class="max-w-3xl">
                 <div class="inline-flex items-center gap-x-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full mb-6 border border-white/20">
                     <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                    <span class="text-sm font-medium tracking-widest">UPDATED JULY 9, 2026 • 11:12 AM CDT</span>
+                    <span class="text-sm font-medium tracking-widest"><div id="last-updated" class="inline-flex items-center gap-2">
+    <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+    <span>LIVE RSS FEEDS ACTIVE</span>
+</div></span>
                 </div>
                 
                 <h1 class="text-6xl md:text-7xl font-bold tracking-tighter leading-none mb-4 heading-serif">
@@ -1096,4 +1099,24 @@ This is a fully functional static prototype built with public information. For p
         window.onload = initialize;
     </script>
 </body>
+    <script>
+function updateTimestamp() {
+    const now = new Date();
+
+    const formatted = now.toLocaleString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZoneName: "short"
+    });
+
+    document.getElementById("last-updated").innerHTML =
+        '<span class="w-2 h-2 bg-green-400 rounded-full"></span>' +
+        '<span>UPDATED ' + formatted.toUpperCase() + '</span>';
+}
+
+updateTimestamp();
+</script>
 </html>
