@@ -91,7 +91,6 @@
                 <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
                     <a href="#news" class="hover:text-blue-700 transition-colors">News Feed</a>
                     <a href="#cases" class="hover:text-blue-700 transition-colors">Case Database</a>
-                    <a href="#resources" class="hover:text-blue-700 transition-colors">Resources</a>
                 </div>
 
                 <div class="flex items-center gap-x-3">
@@ -234,52 +233,6 @@
         </div>
     </div>
 
-    <!-- Resources & Sources -->
-    <div id="resources" class="max-w-screen-2xl mx-auto px-8 py-14">
-        <div class="max-w-4xl">
-            <h2 class="section-header mb-3">Primary Sources &amp; Partners</h2>
-            <p class="text-slate-600 mb-8">Media Law News aggregates from these trusted organizations and official court records.</p>
-            
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <a href="https://medialaw.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-newspaper text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="font-semibold">Media Law Resource Center</div>
-                        <div class="text-xs text-slate-500">MLRC • MediaLawDaily</div>
-                    </div>
-                </a>
-                <a href="https://rcfp.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-gavel text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="font-semibold">Reporters Committee</div>
-                        <div class="text-xs text-slate-500">RCFP • First Amendment Handbook</div>
-                    </div>
-                </a>
-                <a href="https://www.law360.com/media" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-tv text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="font-semibold">Law360 Media &amp; Entertainment</div>
-                        <div class="text-xs text-slate-500">Premium legal news</div>
-                    </div>
-                </a>
-                <a href="https://knightcolumbia.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-globe text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="font-semibold">Knight First Amendment Institute</div>
-                        <div class="text-xs text-slate-500">Columbia University</div>
-                    </div>
-                </a>
-                <a href="https://www.supremecourt.gov/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-landmark text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="font-semibold">U.S. Supreme Court</div>
-                        <div class="text-xs text-slate-500">Official Opinions</div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-
     <!-- Footer / Disclaimer -->
     <footer class="bg-slate-900 text-slate-400 text-sm">
         <div class="max-w-screen-2xl mx-auto px-8 py-10">
@@ -415,7 +368,7 @@
                 date: "2025-06-27",
                 category: "first-amendment",
                 categoryLabel: "First Amendment",
-                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult speech and age-based content restrictions.",
+                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult speech.",
                 source: "Supreme Court / FIRE",
                 link: "https://www.supremecourt.gov/opinions/24pdf/23-1122_new.pdf",
                 tags: ["SCOTUS", "Adult Content", "Age Verification"]
@@ -426,7 +379,7 @@
                 date: "2026-03-25",
                 category: "entertainment",
                 categoryLabel: "Entertainment Law",
-                summary: "In a unanimous decision, the Court held that Cox Communications was not contributorily liable for copyright infringement simply because it knew some subscribers were pirating content.",
+                summary: "In a unanimous decision, the Court held that Cox Communications was not contributorily liable for copyright infringement simply because it knew some subscribers were pirating music.",
                 source: "SCOTUSblog / Law360",
                 link: "https://www.scotusblog.com/cases/cox-communications-inc-v-sony-music-entertainment/",
                 tags: ["Copyright", "ISP Liability", "Section 512"]
@@ -1009,95 +962,41 @@
             e.preventDefault();
             const modal = document.getElementById('subscribe-modal');
             modal.innerHTML = `
-                <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center">
-                    <i class="fa-solid fa-check-circle text-emerald-500 text-5xl mb-4"></i>
-                    <h3 class="font-bold text-2xl">You're subscribed!</h3>
-                    <p class="mt-2 text-slate-600">Thank you. Your first digest will arrive next week.</p>
-                    <button onclick="document.getElementById('subscribe-modal').remove()" 
-                            class="mt-6 px-8 py-3 bg-slate-900 text-white rounded-3xl text-sm font-semibold">Close</button>
+                <div class="bg-white rounded-3xl max-w-md w-full p-8 text-center">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-check text-2xl"></i>
+                    </div>
+                    <h4 class="font-bold text-2xl">You're on the list!</h4>
+                    <p class="text-slate-600 mt-2">Thanks for subscribing to the Media Law News weekly digest.</p>
+                    <button onclick="hideSubscribeModal()" class="mt-6 px-6 py-3 bg-blue-900 text-white rounded-3xl">Close</button>
                 </div>
             `;
-            setTimeout(() => {
-            }, 3000);
-        }
-
-        function setupFilterButtons() {
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                });
-            });
-            
-            const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
-            if (allBtn) allBtn.classList.add('filter-active', 'bg-blue-900', 'text-white');
         }
 
         function toggleMobileMenu() {
-            const nav = document.createElement('div');
-            nav.className = `fixed inset-0 bg-black/60 z-[200] md:hidden`;
-            nav.innerHTML = `
-                <div class="bg-white w-72 h-full p-6" onclick="event.stopImmediatePropagation()">
-                    <div class="flex justify-between mb-8">
-                        <span class="font-bold text-2xl">MediaLex</span>
-                        <button onclick="this.closest('.fixed').remove()" class="text-3xl">&times;</button>
-                    </div>
-                    
-                    <div class="space-y-1 text-lg">
-                        <a href="#news" class="block py-3 px-4 hover:bg-slate-100 rounded-2xl" onclick="this.closest('.fixed').remove()">News Feed</a>
-                        <a href="#cases" class="block py-3 px-4 hover:bg-slate-100 rounded-2xl" onclick="this.closest('.fixed').remove()">Case Database</a>
-                        <a href="#resources" class="block py-3 px-4 hover:bg-slate-100 rounded-2xl" onclick="this.closest('.fixed').remove()">Resources</a>
-                    </div>
-                    
-                    <div class="mt-8 pt-8 border-t">
-                        <button onclick="showSubscribeModal(); this.closest('.fixed').remove()" 
-                                class="w-full py-3.5 bg-blue-900 text-white rounded-3xl font-semibold">Get Daily Digest</button>
-                    </div>
-                </div>
+            const existing = document.getElementById('mobile-menu');
+            if (existing) {
+                existing.remove();
+                return;
+            }
+            const menu = document.createElement('div');
+            menu.id = 'mobile-menu';
+            menu.className = 'md:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-200 p-6 flex flex-col gap-4 text-sm font-medium';
+            menu.innerHTML = `
+                <a href="#news" onclick="this.parentElement.remove()">News Feed</a>
+                <a href="#cases" onclick="this.parentElement.remove()">Case Database</a>
             `;
-            document.body.appendChild(nav);
+            document.querySelector('nav').appendChild(menu);
         }
 
-        function downloadData() {
-            const data = {
-                news: newsData,
-                cases: casesData,
-                exported: new Date().toISOString(),
-                note: "Media Law News prototype data export"
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'medialex_data_export.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function initialize() {
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
             initializeTailwind();
+            setupGlobalSearch();
             renderNews();
             renderCases();
-            updateStats();
             loadLiveNews();
-            setupGlobalSearch();
-            setupFilterButtons();
-            
-            const allFilterBtn = document.querySelector('.filter-btn[data-filter="all"]');
-            if (allFilterBtn) {
-                allFilterBtn.classList.add('bg-blue-900', 'text-white', 'filter-active');
-            }
-
-            document.addEventListener('keydown', function(e) {
-                if (e.key === '/' && document.activeElement.tagName === 'BODY') {
-                    e.preventDefault();
-                    document.getElementById('global-search').focus();
-                }
-            });
-        }
-
-        initialize();
+        });
     </script>
 </body>
 </html>
