@@ -388,21 +388,21 @@
             document.documentElement.style.setProperty('--accent', '#1e40af');
         }
 
-        // Live RSS feeds, converted to JSON by the free rss2json.com service.
-        // The free tier works without an API key but limits each feed to ~10 items.
-        const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
+        // Live RSS feeds. The feeds are fetched and cached on the server by a
+        // scheduled Netlify Function and served from /api/feeds.
+        const FEEDS_ENDPOINT = '/api/feeds';
         const RSS_FEEDS = [
             { url: 'https://www.scotusblog.com/feed/', source: 'SCOTUSblog', category: 'first-amendment' },
             { url: 'https://firstamendmentwatch.org/feed/', source: 'First Amendment Watch', category: 'first-amendment' },
             { url: 'https://www.rcfp.org/feed/', source: 'Reporters Committee (RCFP)', category: 'media-law' },
             { url: 'https://www.eff.org/rss/updates.xml', source: 'EFF Deeplinks', category: 'media-law' },
-            { url: 'https://www.hollywoodreporter.com/t/thr-esq/feed/', source: 'The Hollywood Reporter', category: 'entertainment' },
-            { url: 'https://defamationlawblog.com/feed', source: 'California Defamation Law Blog', category: 'defamation-privacy' },
-            { url: 'https://iapp.org/rss/news.xml', source: 'IAPP Daily News', category: 'defamation-privacy' },
+            { url: 'https://deadline.com/category/legal/feed/', source: 'Deadline Legal', category: 'entertainment' },
+            { url: 'https://epic.org/feed/', source: 'EPIC', category: 'defamation-privacy' },
+            { url: 'https://www.insideprivacy.com/feed/', source: 'Covington Inside Privacy', category: 'defamation-privacy' },
             { url: 'https://eyeonprivacy.sheppardmullinplatform.com/feed/', source: 'Sheppard Mullin Eye on Privacy', category: 'defamation-privacy' }
         ];
-        const FEED_CACHE_KEY = 'media-law-news-live-v1';
-        const FEED_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+        const FEED_CACHE_KEY = 'media-law-news-live-v2';
+        const FEED_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
         const CATEGORY_LABELS = {
             'first-amendment': 'First Amendment',
@@ -543,19 +543,14 @@
             return fallback;
         }
 
-        async function fetchFeed(feed) {
-            const res = await fetch(RSS2JSON_ENDPOINT + encodeURIComponent(feed.url));
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            if (data.status !== 'ok') throw new Error(data.message || 'Feed error');
-
-            return (data.items || []).map(item => {
-                const summary = truncate(stripHTML(item.description || item.content));
+        function feedItemsToNews(feed, items) {
+            return (items || []).map(item => {
+                const summary = truncate(stripHTML(item.description));
                 const title = stripHTML(item.title);
                 const category = classifyItem(`${title} ${summary} ${(item.categories || []).join(' ')}`, feed.category);
                 return {
                     title,
-                    date: item.pubDate ? item.pubDate.replace(' ', 'T') + 'Z' : new Date().toISOString(),
+                    date: item.pubDate || new Date().toISOString(),
                     category,
                     categoryLabel: CATEGORY_LABELS[category],
                     summary,
@@ -641,12 +636,24 @@
                 return;
             }
 
-            const results = await Promise.allSettled(RSS_FEEDS.map(fetchFeed));
-            const liveItems = results.filter(r => r.status === 'fulfilled').flatMap(r => r.value);
-            const failed = results.filter(r => r.status === 'rejected').length;
-            activeSourceCount = RSS_FEEDS.length - failed;
-            results.forEach((r, i) => {
-                if (r.status === 'rejected') console.warn(`[Media Law News] Feed failed: ${RSS_FEEDS[i].source}`, r.reason);
+            let snapshotFeeds = [];
+            try {
+                const res = await fetch(FEEDS_ENDPOINT);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                snapshotFeeds = (await res.json()).feeds || [];
+            } catch (error) {
+                console.warn('[Media Law News] Could not load feeds', error);
+            }
+            const byUrl = new Map(snapshotFeeds.map(f => [f.url, f]));
+            let liveItems = [];
+            activeSourceCount = 0;
+            RSS_FEEDS.forEach(feed => {
+                const result = byUrl.get(feed.url);
+                if (result && result.status !== 'ok') console.warn(`[Media Law News] Feed failed: ${feed.source}`, result.message);
+                if (result && result.items && result.items.length) {
+                    activeSourceCount++;
+                    liveItems = liveItems.concat(feedItemsToNews(feed, result.items));
+                }
             });
 
             if (liveItems.length === 0) {
