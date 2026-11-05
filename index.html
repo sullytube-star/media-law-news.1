@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaLex • Media Law, Entertainment Law & First Amendment Aggregator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Playfair+Display:wght@700&amp;display=swap');
+        
+        :root {
+            --primary: #1e3a8a;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .heading-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+
+        .legal-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .legal-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .nav-active {
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        .category-tag {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.625rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+
+        .section-header {
+            font-size: 1.75rem;
+            line-height: 1.1;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .case-modal {
+            animation: modalPop 0.2s ease-out forwards;
+        }
+
+        .news-grid {
+            scrollbar-width: thin;
+        }
+
+        .stat-number {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .filter-active {
+            background-color: #1e40af;
+            color: white;
+            border-color: #1e40af;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-screen-2xl mx-auto">
+            <div class="px-8 py-5 flex items-center justify-between">
+                <div class="flex items-center gap-x-3">
+                    <!-- Logo -->
+                    <div class="flex items-center gap-x-2.5">
+                        <div class="w-10 h-10 bg-blue-900 rounded-2xl flex items-center justify-center">
+                            <i class="fa-solid fa-balance-scale text-white text-3xl"></i>
+                        </div>
+                        <div>
+                            <span class="font-bold text-3xl tracking-tighter">MediaLex</span>
+                            <span class="text-xs font-mono text-slate-500 block -mt-1">EST 2026</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
+                    <a href="#news" class="hover:text-blue-700 transition-colors">News Feed</a>
+                    <a href="#cases" class="hover:text-blue-700 transition-colors">Case Database</a>
+                    <a href="#resources" class="hover:text-blue-700 transition-colors">Resources</a>
+                </div>
+
+                <div class="flex items-center gap-x-3">
+                    <!-- Search -->
+                    <div class="relative hidden md:block w-72">
+                        <input id="global-search" 
+                               type="text" 
+                               placeholder="Search cases or news..." 
+                               class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 focus:border-blue-600 rounded-3xl text-sm placeholder:text-slate-400 focus:outline-none">
+                        <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                    </div>
+                    
+                    <button onclick="showSubscribeModal()"
+                            class="hidden md:flex items-center gap-x-2 px-5 py-2.5 bg-blue-900 hover:bg-blue-800 transition-colors text-white text-sm font-semibold rounded-3xl">
+                        <i class="fa-solid fa-envelope mr-1.5"></i>
+                        <span>Get Daily Digest</span>
+                    </button>
+                    
+                    <!-- Mobile menu -->
+                    <button class="md:hidden w-10 h-10 flex items-center justify-center text-slate-600 hover:text-slate-900" onclick="toggleMobileMenu()">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
+        <div class="max-w-screen-2xl mx-auto px-8 pt-16 pb-20">
+            <div class="max-w-3xl">
+                <div class="inline-flex items-center gap-x-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full mb-6 border border-white/20">
+                    <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <span class="text-sm font-medium tracking-widest">UPDATED JULY 9, 2026 • 11:12 AM CDT</span>
+                </div>
+                
+                <h1 class="text-6xl md:text-7xl font-bold tracking-tighter leading-none mb-4 heading-serif">
+                    Cases that shape<br>speech, content &amp;<br>creative industries.
+                </h1>
+                <p class="max-w-md text-xl text-slate-300 mb-8">
+                    A curated aggregator of the most important media law, entertainment law, 
+                    and First Amendment developments from courts across the U.S.
+                </p>
+                
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="document.getElementById('news').scrollIntoView({ behavior: 'smooth' })" 
+                            class="px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-3xl flex items-center gap-x-2 transition-all active:scale-[0.985]">
+                        <span>Browse Latest News</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    
+                    <button onclick="document.getElementById('cases').scrollIntoView({ behavior: 'smooth' })" 
+                            class="px-8 py-4 border border-white/30 hover:bg-white/10 font-semibold rounded-3xl flex items-center gap-x-2 transition-all">
+                        <span>Explore Case Database</span>
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-x-6 mt-8 text-sm">
+                    <div class="flex -space-x-2">
+                        <div class="w-7 h-7 bg-white/90 rounded-full border border-white overflow-hidden"><img src="https://i.pravatar.cc/28?img=32" class="w-full h-full object-cover"></div>
+                        <div class="w-7 h-7 bg-white/90 rounded-full border border-white overflow-hidden"><img src="https://i.pravatar.cc/28?img=47" class="w-full h-full object-cover"></div>
+                        <div class="w-7 h-7 bg-white/90 rounded-full border border-white overflow-hidden"><img src="https://i.pravatar.cc/28?img=28" class="w-full h-full object-cover"></div>
+                    </div>
+                    <span class="text-slate-400 text-sm">Trusted by 2,400+ media &amp; legal professionals</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="border-b border-slate-200 bg-white">
+        <div class="max-w-screen-2xl mx-auto px-8 py-5">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
+                <div>
+                    <div class="text-3xl font-semibold tracking-tighter stat-number">1,284</div>
+                    <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">CASES TRACKED</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-semibold tracking-tighter stat-number">142</div>
+                    <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">NEW IN 2026</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-semibold tracking-tighter stat-number">47</div>
+                    <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">SUPREME COURT RULINGS</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-semibold tracking-tighter">89</div>
+                    <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">ACTIVE SOURCES</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- News Feed Section -->
+    <div id="news" class="max-w-screen-2xl mx-auto px-8 pt-12 pb-8">
+        <div class="flex items-end justify-between mb-8">
+            <div>
+                <span class="text-blue-700 font-semibold tracking-widest text-sm">LIVE UPDATES</span>
+                <h2 class="section-header">Latest News &amp; Developments</h2>
+            </div>
+            
+            <!-- Category Filters -->
+            <div class="hidden md:flex items-center gap-2 bg-white p-1 rounded-3xl shadow-sm border border-slate-200">
+                <button onclick="filterNews('all')" class="filter-btn active px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="all">All</button>
+                <button onclick="filterNews('first-amendment')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="first-amendment">First Amendment</button>
+                <button onclick="filterNews('media-law')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="media-law">Media Law</button>
+                <button onclick="filterNews('entertainment')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="entertainment">Entertainment Law</button>
+            </div>
+        </div>
+
+        <!-- News Cards Grid -->
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <!-- Populated by JavaScript -->
+        </div>
+        
+        <div class="mt-6 text-center">
+            <button onclick="showAllNews()" 
+                    class="text-sm font-semibold px-6 py-3 border border-slate-300 hover:bg-white rounded-3xl flex items-center gap-x-2 mx-auto">
+                <span>View Full News Archive</span>
+                <i class="fa-solid fa-external-link-alt text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Case Database Section -->
+    <div id="cases" class="bg-white border-t border-b border-slate-200 py-12">
+        <div class="max-w-screen-2xl mx-auto px-8">
+            <div class="flex items-end justify-between mb-8">
+                <div>
+                    <span class="text-blue-700 font-semibold tracking-widest text-sm">COMPREHENSIVE DATABASE</span>
+                    <h2 class="section-header">Key Cases &amp; Precedents</h2>
+                    <p class="text-slate-600 mt-1">Landmark and recent rulings shaping the field</p>
+                </div>
+                
+                <div class="hidden md:block">
+                    <input id="case-search" type="text" placeholder="Search cases..." 
+                           class="w-80 px-4 py-3 border border-slate-300 rounded-3xl text-sm focus:outline-none focus:border-blue-600">
+                </div>
+            </div>
+
+            <div id="cases-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Resources & Sources -->
+    <div id="resources" class="max-w-screen-2xl mx-auto px-8 py-14">
+        <div class="max-w-4xl">
+            <h2 class="section-header mb-3">Primary Sources &amp; Partners</h2>
+            <p class="text-slate-600 mb-8">MediaLex aggregates from these trusted organizations and official court records.</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <a href="https://medialaw.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-newspaper text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Media Law Resource Center</div>
+                        <div class="text-xs text-slate-500">MLRC • MediaLawDaily</div>
+                    </div>
+                </a>
+                <a href="https://rcfp.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-gavel text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Reporters Committee</div>
+                        <div class="text-xs text-slate-500">RCFP • First Amendment Handbook</div>
+                    </div>
+                </a>
+                <a href="https://www.law360.com/media" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-tv text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Law360 Media &amp; Entertainment</div>
+                        <div class="text-xs text-slate-500">Premium legal news</div>
+                    </div>
+                </a>
+                <a href="https://knightcolumbia.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-globe text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Knight First Amendment Institute</div>
+                        <div class="text-xs text-slate-500">Columbia University</div>
+                    </div>
+                </a>
+                <a href="https://www.supremecourt.gov/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-landmark text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">U.S. Supreme Court</div>
+                        <div class="text-xs text-slate-500">Official Opinions</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer / Disclaimer -->
+    <footer class="bg-slate-900 text-slate-400 text-sm">
+        <div class="max-w-screen-2xl mx-auto px-8 py-10">
+            <div class="flex flex-col md:flex-row gap-y-6 justify-between items-start md:items-center">
+                <div>
+                    <div class="flex items-center gap-x-2 mb-1">
+                        <span class="font-semibold text-white">MediaLex</span>
+                        <span class="text-xs px-2 py-0.5 bg-white/10 rounded">PROTOTYPE</span>
+                    </div>
+                    <p class="max-w-md">This is a fully functional static prototype built with public information. 
+                    For production use, connect real-time RSS feeds from MLRC, SCOTUSblog, and court dockets.</p>
+                </div>
+                
+                <div class="text-xs space-y-1 md:text-right">
+                    <div>Data current as of July 9, 2026</div>
+                    <div>Curated from public court records, MLRC, FIRE, SCOTUSblog &amp; more</div>
+                    <div class="pt-2">
+                        <button onclick="downloadData()" class="text-xs underline hover:text-white">Export case data (JSON)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Case Detail Modal -->
+    <div id="case-modal" onclick="if (event.target.id === 'case-modal') hideCaseModal()" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div onclick="event.stopImmediatePropagation()" class="case-modal bg-white rounded-3xl max-w-3xl w-full max-h-[85vh] overflow-hidden shadow-2xl">
+            <div class="px-8 pt-8 pb-6 border-b flex justify-between items-start">
+                <div>
+                    <div id="modal-category" class="category-tag inline-block mb-3"></div>
+                    <h3 id="modal-title" class="text-3xl font-bold tracking-tight pr-8"></h3>
+                    <div id="modal-citation" class="text-slate-500 mt-1 font-mono text-sm"></div>
+                </div>
+                <button onclick="hideCaseModal()" class="text-3xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+            </div>
+            
+            <div class="p-8 overflow-auto max-h-[55vh]">
+                <div id="modal-holding" class="prose prose-slate max-w-none text-[15px]"></div>
+                
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                    <div>
+                        <div class="font-semibold text-slate-500 mb-1.5">KEY ISSUES</div>
+                        <div id="modal-issues" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-slate-500 mb-1.5">IMPACT</div>
+                        <div id="modal-impact" class="text-slate-700"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-8 py-5 border-t bg-slate-50 flex items-center justify-between">
+                <div class="flex items-center gap-x-3 text-xs">
+                    <span id="modal-date" class="font-medium"></span>
+                    <span class="text-slate-300">•</span>
+                    <span id="modal-court" class="text-slate-600"></span>
+                </div>
+                <div>
+                    <a id="modal-link" href="#" target="_blank" 
+                       class="inline-flex items-center gap-x-2 text-sm font-semibold px-5 py-2.5 bg-blue-900 hover:bg-blue-800 text-white rounded-3xl">
+                        <span>Read Full Opinion</span>
+                        <i class="fa-solid fa-external-link-alt text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscribe Modal -->
+    <div id="subscribe-modal" onclick="if (event.target.id === 'subscribe-modal') hideSubscribeModal()" class="hidden fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-6">
+        <div onclick="event.stopImmediatePropagation()" class="bg-white rounded-3xl max-w-md w-full p-8">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <h4 class="font-bold text-2xl">Stay Informed</h4>
+                    <p class="text-slate-600">Weekly curated digest of media &amp; First Amendment cases</p>
+                </div>
+                <button onclick="hideSubscribeModal()" class="text-3xl leading-none">&times;</button>
+            </div>
+            
+            <form onsubmit="subscribeUser(event)" class="space-y-4 mt-6">
+                <div>
+                    <label class="text-xs font-semibold tracking-widest text-slate-500">FULL NAME</label>
+                    <input type="text" required class="w-full border border-slate-300 rounded-2xl px-4 py-3 text-sm" placeholder="Alex Rivera">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold tracking-widest text-slate-500">EMAIL ADDRESS</label>
+                    <input type="email" required class="w-full border border-slate-300 rounded-2xl px-4 py-3 text-sm" placeholder="you@lawfirm.com">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold tracking-widest text-slate-500">INTEREST AREAS</label>
+                    <div class="flex flex-wrap gap-2 mt-1.5">
+                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> First Amendment</label>
+                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> Entertainment / Copyright</label>
+                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" class="accent-blue-900"> Defamation &amp; Privacy</label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-3.5 rounded-3xl transition-colors">
+                    Subscribe to Weekly Digest
+                </button>
+                <p class="text-[10px] text-center text-slate-400">We respect your inbox. Unsubscribe anytime.</p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tailwind script
+        function initializeTailwind() {
+            document.documentElement.style.setProperty('--accent', '#1e40af');
+        }
+
+        // Sample News Data (curated real + representative)
+        const newsData = [
+            {
+                id: 1,
+                title: "SCOTUS Upholds Texas Age-Verification Law for Adult Websites",
+                date: "2025-06-27",
+                category: "first-amendment",
+                categoryLabel: "First Amendment",
+                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult entertainment industry and free speech doctrine.",
+                source: "Supreme Court / FIRE",
+                link: "https://www.supremecourt.gov/opinions/24pdf/23-1122_new.pdf",
+                tags: ["SCOTUS", "Adult Content", "Age Verification"]
+            },
+            {
+                id: 2,
+                title: "Supreme Court Rules ISPs Not Contributorily Liable for User Piracy in Cox v. Sony",
+                date: "2026-03-25",
+                category: "entertainment",
+                categoryLabel: "Entertainment Law",
+                summary: "In a unanimous decision, the Court held that Cox Communications was not contributorily liable for copyright infringement simply because it knew some subscribers were pirating music. Requires affirmative intent or tailored service.",
+                source: "SCOTUSblog / Law360",
+                link: "https://www.scotusblog.com/cases/cox-communications-inc-v-sony-music-entertainment/",
+                tags: ["Copyright", "ISP Liability", "Section 512"]
+            },
+            {
+                id: 3,
+                title: "Colorado Conversion Therapy Ban Struck as Viewpoint Discrimination",
+                date: "2026-03-31",
+                category: "first-amendment",
+                categoryLabel: "First Amendment",
+                summary: "Chiles v. Salazar: 8-1 decision holds that Colorado’s ban on conversion therapy for minors, as applied to licensed counselor’s talk therapy, constitutes viewpoint discrimination requiring strict scrutiny.",
+                source: "SCOTUS / First Amendment Encyclopedia",
+                link: "https://www.supremecourt.gov/opinions/25pdf/24-539_fd9g.pdf",
+                tags: ["Professional Speech", "Viewpoint Discrimination", "LGBTQ+"]
+            },
+            {
+                id: 4,
+                title: "TikTok Ban Law Survives First Amendment Challenge",
+                date: "2025-01-17",
+                category: "first-amendment",
+                categoryLabel: "First Amendment",
+                summary: "TikTok v. Garland: Supreme Court rejected claims that the law forcing divestiture or ban of TikTok violated the platform’s and users’ free speech rights.",
+                source: "Knight First Amendment Institute",
+                link: "https://knightcolumbia.org/",
+                tags: ["Social Media", "National Security", "Platform Speech"]
+            },
+            {
+                id: 5,
+                title: "Eleventh Circuit Tosses Roy Moore’s $8.2M Defamation Award Against Laura Loomer",
+                date: "2026-04-12",
+                category: "media-law",
+                categoryLabel: "Media Law",
+                summary: "Court reverses massive defamation verdict, reinforcing strong protections for political speech and commentary even when sharp or controversial.",
+                source: "Media Law Resource Center",
+                link: "https://medialaw.org/",
+                tags: ["Defamation", "Political Speech", "Actual Malice"]
+            },
+            {
+                id: 6,
+                title: "Major Music Labels Win Key Copyright Victory — But SCOTUS Narrows Secondary Liability",
+                date: "2026-03-26",
+                category: "entertainment",
+                categoryLabel: "Entertainment Law",
+                summary: "While Sony and other labels secured significant damages at trial, the Supreme Court’s Cox decision significantly limits how far copyright owners can reach upstream to hold service providers accountable.",
+                source: "Law360 Media",
+                link: "https://www.law360.com/media",
+                tags: ["Music Copyright", "Secondary Liability", "DMCA"]
+            },
+            {
+                id: 7,
+                title: "NYT v. OpenAI Copyright Case Moves Forward on Training Data Claims",
+                date: "2026-02-18",
+                category: "media-law",
+                categoryLabel: "Media Law",
+                summary: "Ongoing high-stakes litigation tests whether using copyrighted news articles to train large language models constitutes fair use or infringement. Key fair use and transformative use issues.",
+                source: "Various / Legal Tech Hub",
+                link: "https://www.law.com/",
+                tags: ["AI", "Copyright", "Fair Use", "News Media"]
+            },
+            {
+                id: 8,
+                title: "First Amendment Watch Launches National SLAPP Database",
+                date: "2026-01-15",
+                category: "first-amendment",
+                categoryLabel: "First Amendment",
+                summary: "New public database tracks Strategic Lawsuits Against Public Participation targeting journalists, activists, and critics across the country.",
+                source: "First Amendment Watch",
+                link: "https://firstamendmentwatch.org/",
+                tags: ["SLAPP", "Anti-SLAPP", "Press Freedom"]
+            }
+        ];
+
+        // Sample Landmark + Recent Cases Database
+        const casesData = [
+            {
+                id: "c1",
+                title: "New York Times Co. v. Sullivan",
+                citation: "376 U.S. 254 (1964)",
+                date: "1964",
+                category: "first-amendment",
+                categoryLabel: "First Amendment",
+                court: "U.S. Supreme Court",
+                holding: "Established the 'actual malice' standard for defamation claims brought by public officials. Requires proof that the defendant knew the statement was false or acted with reckless disregard for the truth.",
+                issues: ["Defamation", "Public Officials", "Actual Malice"],
+                impact: "Foundation of modern press freedom in the United States. Protects robust public debate.",
+                link: "https://supreme.justia.com/cases/federal/us/376/254/"
+            },
+            {
+                id: "c2",
+                title: "New York Times Co. v. United States (Pentagon Papers)",
+                citation: "403 U.S. 713 (1971)",
+                date: "1971",
+                category: "first-amendment",
+                categoryLabel: "First Amendment",
+                court: "U.S. Supreme Court",
+                holding: "The government failed to meet the heavy burden required to justify prior restraint on publication of classified documents. Strong presumption against prior restraints.",
+                issues: ["Prior Restraint", "National Security", "Press Freedom"],
+                impact: "Landmark victory for press freedom and against government censorship.",
+                link: "https://supreme.justia.com/cases/federal/us/403/713/"
+            },
+            {
+                id: "c3",
+                title: "Cox Communications, Inc. v. Sony Music Entertainment",
+                citation: "No. 24-171 (2026)",
+                date: "March 25, 2026",
+                category: "entertainment",
+                categoryLabel: "Entertainment Law",
+                court: "U.S. Supreme Court",
+                holding: "Internet service providers are not contributorily liable for users’ copyright infringement merely by providing service with knowledge that some users infringe. Liability requires intent to induce infringement or a service tailored for infringement.",
+                issues: ["Copyright Infringement", "Contributory Liability", "ISP Liability"],
+                impact: "Major win for tech platforms and broadband providers. Limits reach of copyright enforcement upstream.",
+                link: "https://www.scotusblog.com/cases/cox-communications-inc-v-sony-music-entertainment/"
+            },
+            {
+                id: "c4",
+                title: "Chiles v. Salazar",
+                citation: "No. 24-539 (2026)",
+                date: "March 31, 2026",
+                category: "first-amendment",
+                categoryLabel: "First Amendment",
+                court: "U.S. Supreme Court",
+                holding: "Colorado’s ban on conversion therapy for minors, as applied to a licensed counselor’s talk therapy, regulates speech on the basis of viewpoint and is subject to strict scrutiny under the First Amendment.",
+                issues: ["Viewpoint Discrimination", "Professional Speech", "Conversion Therapy"],
+                impact: "Significant expansion of First Amendment protections for professional speech and counseling. Remanded for further proceedings.",
+                link: "https://www.supremecourt.gov/opinions/25pdf/24-539_fd9g.pdf"
+            },
+            {
+                id: "c5",
+                title: "Hustler Magazine v. Falwell",
+                citation: "485 U.S. 46 (1988)",
+                date: "1988",
+                category: "first-amendment",
+                categoryLabel: "First Amendment",
+                court: "U.S. Supreme Court",
+                holding: "Public figures cannot recover for intentional infliction of emotional distress arising from parody or satire without showing actual malice.",
+                issues: ["Satire & Parody", "Emotional Distress", "Public Figures"],
+                impact: "Protects political cartoons, satire, and robust criticism of public figures.",
+                link: "https://supreme.justia.com/cases/federal/us/485/46/"
+            },
+            {
+                id: "c6",
+                title: "Brown v. Entertainment Merchants Ass'n",
+                citation: "564 U.S. 786 (2011)",
+                date: "2011",
+                category: "entertainment",
+                categoryLabel: "Entertainment Law",
+                court: "U.S. Supreme Court",
+                holding: "Video games are protected speech under the First Amendment. California’s law restricting sales of violent video games to minors was struck down.",
+                issues: ["Video Games", "Minors & Speech", "Content-Based Restrictions"],
+                impact: "Confirmed strong First Amendment protection for new forms of entertainment media.",
+                link: "https://supreme.justia.com/cases/federal/us/564/786/"
+            },
+            {
+                id: "c7",
+                title: "Moody v. NetChoice, LLC & NetChoice v. Paxton",
+                citation: "603 U.S. ___ (2024)",
+                date: "2024",
+                category: "media-law",
+                categoryLabel: "Media Law",
+                court: "U.S. Supreme Court",
+                holding: "Social media platforms engage in protected First Amendment speech when they curate and moderate content. States cannot force platforms to carry speech they disagree with.",
+                issues: ["Content Moderation", "Platform Speech", "State Regulation of Social Media"],
+                impact: "Clarified that there is no 'social media exception' to the First Amendment. Platforms have editorial rights.",
+                link: "https://www.supremecourt.gov/opinions/23pdf/22-277_3dq3.pdf"
+            },
+            {
+                id: "c8",
+                title: "TikTok v. Garland",
+                citation: "No. 24-656 (2025)",
+                date: "January 2025",
+                category: "first-amendment",
+                categoryLabel: "First Amendment",
+                court: "U.S. Supreme Court",
+                holding: "Upheld the federal law requiring ByteDance to divest TikTok or face a ban in the U.S. Rejected arguments that the law violated the First Amendment rights of the platform and its users.",
+                issues: ["Social Media Platforms", "Foreign Ownership", "National Security vs Speech"],
+                impact: "Allowed significant government action against a major platform despite free speech concerns.",
+                link: "https://www.supremecourt.gov/"
+            }
+        ];
+
+        // Render News Cards
+        function renderNews(filteredNews = newsData) {
+            const container = document.getElementById('news-grid');
+            container.innerHTML = '';
+
+            filteredNews.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `legal-card bg-white border border-slate-200 rounded-3xl p-6 flex flex-col h-full`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="category-tag ${getCategoryColor(item.category)}">${item.categoryLabel}</span>
+                        <span class="text-xs text-slate-500 font-mono">${formatDate(item.date)}</span>
+                    </div>
+                    
+                    <h3 class="font-semibold text-[15.5px] leading-tight tracking-tight mb-3 line-clamp-3">${item.title}</h3>
+                    
+                    <p class="text-sm text-slate-600 line-clamp-3 flex-grow">${item.summary}</p>
+                    
+                    <div class="mt-5 pt-4 border-t flex items-center justify-between text-xs">
+                        <div class="text-slate-500">${item.source}</div>
+                        <div class="flex items-center gap-x-1">
+                            <button onclick="showNewsModal(${item.id}); event.stopImmediatePropagation();" 
+                                    class="font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-x-1">
+                                <span>Details</span> 
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                            <a href="${item.link}" target="_blank" onclick="event.stopImmediatePropagation();" 
+                               class="ml-2 text-blue-700 hover:text-blue-800">
+                                <i class="fa-solid fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function getCategoryColor(category) {
+            if (category === 'first-amendment') return 'bg-violet-100 text-violet-700';
+            if (category === 'media-law') return 'bg-amber-100 text-amber-700';
+            if (category === 'entertainment') return 'bg-emerald-100 text-emerald-700';
+            return 'bg-slate-100 text-slate-700';
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Filter News
+        let currentNewsFilter = 'all';
+
+        function filterNews(filter) {
+            currentNewsFilter = filter;
+            
+            // Update active button styles
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('filter-active', 'bg-blue-900', 'text-white');
+                btn.classList.add('hover:bg-slate-100');
+                
+                if ((filter === 'all' && btn.dataset.filter === 'all') || 
+                    btn.dataset.filter === filter) {
+                    btn.classList.add('filter-active', 'bg-blue-900', 'text-white');
+                    btn.classList.remove('hover:bg-slate-100');
+                }
+            });
+
+            let filtered = newsData;
+            if (filter !== 'all') {
+                filtered = newsData.filter(item => item.category === filter);
+            }
+            
+            // Apply global search if active
+            const searchTerm = document.getElementById('global-search').value.toLowerCase().trim();
+            if (searchTerm) {
+                filtered = filtered.filter(item => 
+                    item.title.toLowerCase().includes(searchTerm) || 
+                    item.summary.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            renderNews(filtered);
+        }
+
+        // Render Cases
+        function renderCases(filteredCases = casesData) {
+            const container = document.getElementById('cases-grid');
+            container.innerHTML = '';
+
+            filteredCases.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `legal-card bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 cursor-pointer flex flex-col`;
+                card.onclick = () => showCaseModal(item.id);
+                
+                card.innerHTML = `
+                    <div class="flex justify-between mb-4">
+                        <span class="category-tag ${getCategoryColor(item.category)}">${item.categoryLabel}</span>
+                        <span class="font-mono text-xs text-slate-500">${item.date}</span>
+                    </div>
+                    
+                    <h3 class="font-bold text-lg tracking-tight leading-none mb-2">${item.title}</h3>
+                    <div class="font-mono text-xs text-slate-500 mb-4">${item.citation}</div>
+                    
+                    <p class="text-sm text-slate-600 line-clamp-3 flex-grow">${item.holding.substring(0, 165)}...</p>
+                    
+                    <div class="mt-auto pt-4 flex items-center justify-between text-xs text-blue-700 font-medium">
+                        <span>View full case</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Case Modal
+        function showCaseModal(caseId) {
+            const item = casesData.find(c => c.id === caseId);
+            if (!item) return;
+
+            document.getElementById('modal-category').innerHTML = `<span class="category-tag ${getCategoryColor(item.category)}">${item.categoryLabel}</span>`;
+            document.getElementById('modal-title').textContent = item.title;
+            document.getElementById('modal-citation').textContent = item.citation;
+            document.getElementById('modal-holding').innerHTML = `<p>${item.holding}</p>`;
+            document.getElementById('modal-date').textContent = item.date;
+            document.getElementById('modal-court').textContent = item.court;
+            document.getElementById('modal-link').href = item.link;
+
+            // Issues tags
+            const issuesContainer = document.getElementById('modal-issues');
+            issuesContainer.innerHTML = '';
+            item.issues.forEach(issue => {
+                const tag = document.createElement('span');
+                tag.className = 'px-3 py-1 bg-slate-100 text-slate-700 text-xs rounded-2xl';
+                tag.textContent = issue;
+                issuesContainer.appendChild(tag);
+            });
+
+            document.getElementById('modal-impact').textContent = item.impact;
+
+            document.getElementById('case-modal').classList.remove('hidden');
+            document.getElementById('case-modal').classList.add('flex');
+        }
+
+        function hideCaseModal() {
+            const modal = document.getElementById('case-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        // News Detail Modal (simplified)
+        function showNewsModal(newsId) {
+            const item = newsData.find(n => n.id === newsId);
+            if (!item) return;
+
+            const modalHTML = `
+                <div onclick="this.remove()" class="fixed inset-0 bg-black/70 z-[120] flex items-center justify-center p-4">
+                    <div onclick="event.stopImmediatePropagation()" class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden">
+                        <div class="p-8">
+                            <div class="flex justify-between">
+                                <span class="category-tag ${getCategoryColor(item.category)}">${item.categoryLabel}</span>
+                                <span class="text-sm text-slate-500">${formatDate(item.date)}</span>
+                            </div>
+                            
+                            <h2 class="text-2xl font-bold tracking-tight mt-4 mb-4">${item.title}</h2>
+                            
+                            <div class="prose prose-slate max-w-none text-[15px]">
+                                <p>${item.summary}</p>
+                                <p class="mt-4 text-sm"><strong>Key Tags:</strong> ${item.tags.join(' • ')}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="px-8 py-5 bg-slate-50 border-t flex items-center justify-between text-sm">
+                            <div class="text-slate-600">Source: <span class="font-medium">${item.source}</span></div>
+                            <a href="${item.link}" target="_blank" class="font-semibold flex items-center gap-x-2 text-blue-700">
+                                Read full coverage <i class="fa-solid fa-external-link-alt ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        // Global Search
+        function setupGlobalSearch() {
+            const searchInput = document.getElementById('global-search');
+            
+            searchInput.addEventListener('input', () => {
+                const term = searchInput.value.toLowerCase().trim();
+                
+                // Filter news
+                let filteredNews = newsData;
+                if (currentNewsFilter !== 'all') {
+                    filteredNews = newsData.filter(n => n.category === currentNewsFilter);
+                }
+                if (term) {
+                    filteredNews = filteredNews.filter(n => 
+                        n.title.toLowerCase().includes(term) || 
+                        n.summary.toLowerCase().includes(term) ||
+                        n.tags.join(' ').toLowerCase().includes(term)
+                    );
+                }
+                renderNews(filteredNews);
+
+                // Filter cases
+                let filteredCases = casesData;
+                if (term) {
+                    filteredCases = casesData.filter(c => 
+                        c.title.toLowerCase().includes(term) || 
+                        c.holding.toLowerCase().includes(term) ||
+                        c.issues.join(' ').toLowerCase().includes(term)
+                    );
+                }
+                renderCases(filteredCases);
+            });
+
+            // Case search separate
+            const caseSearch = document.getElementById('case-search');
+            if (caseSearch) {
+                caseSearch.addEventListener('input', () => {
+                    const term = caseSearch.value.toLowerCase().trim();
+                    let filtered = casesData;
+                    if (term) {
+                        filtered = casesData.filter(c => 
+                            c.title.toLowerCase().includes(term) || 
+                            c.holding.toLowerCase().includes(term)
+                        );
+                    }
+                    renderCases(filtered);
+                });
+            }
+        }
+
+        // Subscribe
+        function showSubscribeModal() {
+            document.getElementById('subscribe-modal').classList.remove('hidden');
+            document.getElementById('subscribe-modal').classList.add('flex');
+        }
+
+        function hideSubscribeModal() {
+            const modal = document.getElementById('subscribe-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function subscribeUser(e) {
+            e.preventDefault();
+            const modal = document.getElementById('subscribe-modal');
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center">
+                    <i class="fa-solid fa-check-circle text-emerald-500 text-5xl mb-4"></i>
+                    <h3 class="font-bold text-2xl">You're subscribed!</h3>
+                    <p class="mt-2 text-slate-600">Thank you. Your first digest will arrive next week.</p>
+                    <button onclick="document.getElementById('subscribe-modal').remove()" 
+                            class="mt-6 px-8 py-3 bg-slate-900 text-white rounded-3xl text-sm font-semibold">Close</button>
+                </div>
+            `;
+            
+            // In a real app, this would POST to your backend or email service
+            setTimeout(() => {
+                // Could auto-close or show confirmation
+            }, 3000);
+        }
+
+        // Filter button active state helper
+        function setupFilterButtons() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // The filterNews function already handles styling
+                });
+            });
+            
+            // Set initial active
+            const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
+            if (allBtn) allBtn.classList.add('filter-active', 'bg-blue-900', 'text-white');
+        }
+
+        // Mobile menu
+        function toggleMobileMenu() {
+            const nav = document.createElement('div');
+            nav.className = `fixed inset-0 bg-black/60 z-[200] md:hidden`;
+            nav.innerHTML = `
+                <div class="bg-white w-72 h-full p-6" onclick="event.stopImmediatePropagation()">
+                    <div class="flex justify-between mb-8">
+                        <span class="font-bold text-2xl">MediaLex</span>
+                        <button onclick="this.closest('.fixed').remove()" class="text-3xl">&times;</button>
+                    </div>
+                    
+                    <div class="space-y-1 text-lg">
+                        <a href="#news" class="block py-3 px-4 hover:bg-slate-100 rounded-2xl" onclick="this.closest('.fixed').remove()">News Feed</a>
+                        <a href="#cases" class="block py-3 px-4 hover:bg-slate-100 rounded-2xl" onclick="this.closest('.fixed').remove()">Case Database</a>
+                        <a href="#resources" class="block py-3 px-4 hover:bg-slate-100 rounded-2xl" onclick="this.closest('.fixed').remove()">Resources</a>
+                    </div>
+                    
+                    <div class="mt-8 pt-8 border-t">
+                        <button onclick="showSubscribeModal(); this.closest('.fixed').remove()" 
+                                class="w-full py-3.5 bg-blue-900 text-white rounded-3xl font-semibold">Get Daily Digest</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(nav);
+        }
+
+        // Download data
+        function downloadData() {
+            const data = {
+                news: newsData,
+                cases: casesData,
+                exported: new Date().toISOString(),
+                note: "MediaLex prototype data export"
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'medialex_data_export.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showAllNews() {
+            alert("In a production version, this would open a full searchable archive page or paginated list with hundreds of articles. For now, all current items are visible above.");
+            document.getElementById('news').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize everything
+        function initialize() {
+            initializeTailwind();
+            
+            // Render initial content
+            renderNews();
+            renderCases();
+            
+            // Setup interactions
+            setupGlobalSearch();
+            setupFilterButtons();
+            
+            // Make filter buttons have proper initial state
+            const allFilterBtn = document.querySelector('.filter-btn[data-filter="all"]');
+            if (allFilterBtn) {
+                allFilterBtn.classList.add('bg-blue-900', 'text-white', 'filter-active');
+            }
+
+            // Bonus: Keyboard shortcut for search
+            document.addEventListener('keydown', function(e) {
+                if (e.key === '/' && document.activeElement.tagName === 'BODY') {
+                    e.preventDefault();
+                    document.getElementById('global-search').focus();
+                }
+            });
+
+            // Easter egg / tip
+            console.log('%c[MediaLex] Static prototype ready. Press "/" to focus search. All data is public-domain curated.', 'color:#64748b');
+            
+            // Optional: Pre-filter hint
+            // setTimeout(() => { console.log('%cTip: Try filtering by category or searching "TikTok" or "copyright"', 'color:#94a3b8'); }, 12000);
+        }
+
+        // Boot app
+        window.onload = initialize;
+    </script>
+</body>
+</html>
