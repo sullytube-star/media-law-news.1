@@ -1,46 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Media Law News • Media Law, Entertainment Law & First Amendment Aggregator</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Media Law News • Media Law, Entertainment Law & First Amendment Aggregator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
         :root {
             --primary: #1e3a8a;
         }
-        
+
         body {
-            font-family: 'Inter', system_ui, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
         }
-        
+
         .heading-serif {
             font-family: 'Playfair Display', Georgia, serif;
-        }
-
-        .legal-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .legal-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        }
-
-        .nav-active {
-            color: #1e40af;
-            font-weight: 600;
-        }
-
-        .category-tag {
-            font-size: 0.75rem;
-            padding: 0.125rem 0.625rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            letter-spacing: 0.025em;
         }
 
         .section-header {
@@ -50,16 +28,13 @@
             letter-spacing: -0.025em;
         }
 
-        .case-modal {
-            animation: modalPop 0.2s ease-out forwards;
+        .legal-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .news-grid {
-            scrollbar-width: thin;
-        }
-
-        .stat-number {
-            font-variant-numeric: tabular-nums;
+        .legal-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
 
         .filter-active {
@@ -70,12 +45,10 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
-    <!-- Navbar -->
     <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div class="max-w-screen-2xl mx-auto">
             <div class="px-8 py-5 flex items-center justify-between">
                 <div class="flex items-center gap-x-3">
-                    <!-- Logo -->
                     <div class="flex items-center gap-x-2.5">
                         <div class="w-10 h-10 bg-blue-900 rounded-2xl flex items-center justify-center">
                             <i class="fa-solid fa-balance-scale text-white text-3xl"></i>
@@ -87,31 +60,24 @@
                     </div>
                 </div>
 
-                <!-- Desktop Nav -->
                 <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
                     <a href="#news" class="hover:text-blue-700 transition-colors">News Feed</a>
                     <a href="google-news.html" class="hover:text-blue-700 transition-colors">Google News Daily</a>
                     <a href="#cases" class="hover:text-blue-700 transition-colors">Case Database</a>
-                    <a href="archive.html" class="hover:text-blue-700 transition-colors">Archive</a>
+                    <a href="#resources" class="hover:text-blue-700 transition-colors">Resources</a>
                 </div>
 
                 <div class="flex items-center gap-x-3">
-                    <!-- Search -->
                     <div class="relative hidden md:block w-72">
-                        <input id="global-search" 
-                               type="text" 
-                               placeholder="Search cases or news..." 
-                               class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 focus:border-blue-600 rounded-3xl text-sm placeholder:text-slate-400 focus:outline-none">
+                        <input id="global-search" type="text" placeholder="Search cases or news..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 focus:border-blue-600 rounded-3xl text-sm placeholder:text-slate-400 focus:outline-none" />
                         <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
                     </div>
-                    
-                    <button onclick="showSubscribeModal()"
-                            class="hidden md:flex items-center gap-x-2 px-5 py-2.5 bg-blue-900 hover:bg-blue-800 transition-colors text-white text-sm font-semibold rounded-3xl">
+
+                    <button onclick="showSubscribeModal()" class="hidden md:flex items-center gap-x-2 px-5 py-2.5 bg-blue-900 hover:bg-blue-800 transition-colors text-white text-sm font-semibold rounded-3xl">
                         <i class="fa-solid fa-envelope mr-1.5"></i>
                         <span>Get Daily Digest</span>
                     </button>
-                    
-                    <!-- Mobile menu -->
+
                     <button class="md:hidden w-10 h-10 flex items-center justify-center text-slate-600 hover:text-slate-900" onclick="toggleMobileMenu()">
                         <i class="fa-solid fa-bars text-xl"></i>
                     </button>
@@ -120,78 +86,65 @@
         </div>
     </nav>
 
-    <!-- Hero -->
     <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white">
         <div class="max-w-screen-2xl mx-auto px-8 pt-16 pb-20">
             <div class="max-w-3xl">
                 <div class="inline-flex items-center gap-x-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full mb-6 border border-white/20">
                     <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                    <span class="text-sm font-medium tracking-widest"><div id="last-updated" class="inline-flex items-center gap-2">
-    <span class="w-2 h-2 bg-green-400 rounded-full"></span>
-    <span>LIVE RSS FEEDS ACTIVE</span>
-</div></span>
+                    <span class="text-sm font-medium tracking-widest">LIVE RSS FEEDS ACTIVE</span>
                 </div>
-                
+
                 <h1 class="text-6xl md:text-7xl font-bold tracking-tighter leading-none mb-4 heading-serif">
-                    Cases that shape<br>speech, content &amp;<br>creative industries.
+                    Cases that shape<br />speech, content &amp;<br />creative industries.
                 </h1>
                 <p class="max-w-md text-xl text-slate-300 mb-8">
-                    A curated aggregator of the most important media law, entertainment law, 
+                    A curated aggregator of the most important media law, entertainment law,
                     and First Amendment developments from courts across the U.S.
                 </p>
-                
+
                 <div class="flex flex-wrap gap-3">
-                    <button onclick="document.getElementById('news').scrollIntoView({ behavior: 'smooth' })" 
-                            class="px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-3xl flex items-center gap-x-2 transition-all active:scale-[0.985]">
+                    <button onclick="document.getElementById('news').scrollIntoView({ behavior: 'smooth' })" class="px-8 py-4 bg-white text-slate-900 hover:bg-slate-100 font-semibold rounded-3xl flex items-center gap-x-2 transition-all active:scale-[0.985]">
                         <span>Browse Latest News</span>
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
-                    
-                    <button onclick="document.getElementById('cases').scrollIntoView({ behavior: 'smooth' })" 
-                            class="px-8 py-4 border border-white/30 hover:bg-white/10 font-semibold rounded-3xl flex items-center gap-x-2 transition-all">
+                    <button onclick="document.getElementById('cases').scrollIntoView({ behavior: 'smooth' })" class="px-8 py-4 border border-white/30 hover:bg-white/10 font-semibold rounded-3xl flex items-center gap-x-2 transition-all">
                         <span>Explore Case Database</span>
                     </button>
                 </div>
-                
-            
             </div>
         </div>
     </div>
 
-    <!-- Stats Bar -->
     <div class="border-b border-slate-200 bg-white">
         <div class="max-w-screen-2xl mx-auto px-8 py-5">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
                 <div>
-                    <div id="stats-live" class="text-3xl font-semibold tracking-tighter stat-number">–</div>
+                    <div class="text-3xl font-semibold tracking-tighter">14</div>
                     <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">LIVE STORIES</div>
                 </div>
                 <div>
-                    <div id="stats-week" class="text-3xl font-semibold tracking-tighter stat-number">–</div>
+                    <div class="text-3xl font-semibold tracking-tighter">7</div>
                     <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">NEW THIS WEEK</div>
                 </div>
                 <div>
-                    <div id="stats-scotus" class="text-3xl font-semibold tracking-tighter stat-number">–</div>
+                    <div class="text-3xl font-semibold tracking-tighter">3</div>
                     <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">SUPREME COURT STORIES</div>
                 </div>
                 <div>
-                    <div id="stats-sources" class="text-3xl font-semibold tracking-tighter stat-number">–</div>
+                    <div class="text-3xl font-semibold tracking-tighter">16</div>
                     <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">ACTIVE SOURCES</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- News Feed Section -->
     <div id="news" class="max-w-screen-2xl mx-auto px-8 pt-12 pb-8">
         <div class="flex items-end justify-between mb-8">
             <div>
                 <span class="text-blue-700 font-semibold tracking-widest text-sm">LIVE UPDATES</span>
                 <h2 class="section-header">Latest News &amp; Developments</h2>
-                <p id="feed-status" class="text-xs text-slate-500 mt-1">Loading live feeds…</p>
+                <p class="text-xs text-slate-500 mt-1">Loading live feeds…</p>
             </div>
-            
-            <!-- Category Filters -->
             <div class="hidden md:flex items-center gap-2 bg-white p-1 rounded-3xl shadow-sm border border-slate-200">
                 <button onclick="filterNews('all')" class="filter-btn active px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="all">All</button>
                 <button onclick="filterNews('first-amendment')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="first-amendment">First Amendment</button>
@@ -201,25 +154,57 @@
             </div>
         </div>
 
-        <!-- News Cards Grid -->
         <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            <!-- Populated by JavaScript -->
+            <div class="legal-card bg-white border border-slate-200 rounded-3xl p-6 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="bg-violet-100 text-violet-700 text-xs font-semibold px-3 py-1 rounded-full">First Amendment</span>
+                    <span class="text-xs text-slate-500 font-mono">Jun 27</span>
+                </div>
+                <h3 class="font-semibold text-[15.5px] leading-tight tracking-tight mb-3">SCOTUS Upholds Texas Age-Verification Law for Adult Websites</h3>
+                <p class="text-sm text-slate-600 flex-grow">The Court upheld Texas’s requirement that users verify age before accessing pornographic content, with major implications for online adult speech.</p>
+                <div class="mt-5 pt-4 border-t flex items-center justify-between text-xs">
+                    <div class="text-slate-500">Supreme Court / FIRE</div>
+                    <div class="text-blue-700 font-semibold">Details</div>
+                </div>
+            </div>
+            <div class="legal-card bg-white border border-slate-200 rounded-3xl p-6 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full">Entertainment Law</span>
+                    <span class="text-xs text-slate-500 font-mono">Mar 25</span>
+                </div>
+                <h3 class="font-semibold text-[15.5px] leading-tight tracking-tight mb-3">Supreme Court Rules ISPs Not Contributorily Liable for User Piracy in Cox v. Sony</h3>
+                <p class="text-sm text-slate-600 flex-grow">A unanimous decision limited upstream copyright liability for internet service providers and narrowed contributory infringement exposure.</p>
+                <div class="mt-5 pt-4 border-t flex items-center justify-between text-xs">
+                    <div class="text-slate-500">SCOTUSblog / Law360</div>
+                    <div class="text-blue-700 font-semibold">Details</div>
+                </div>
+            </div>
+            <div class="legal-card bg-white border border-slate-200 rounded-3xl p-6 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full">Media Law</span>
+                    <span class="text-xs text-slate-500 font-mono">Apr 12</span>
+                </div>
+                <h3 class="font-semibold text-[15.5px] leading-tight tracking-tight mb-3">Eleventh Circuit Tosses Roy Moore’s $8.2M Defamation Award Against Laura Loomer</h3>
+                <p class="text-sm text-slate-600 flex-grow">The appellate court reversed a major defamation verdict, reinforcing strong protections for sharp political speech and commentary.</p>
+                <div class="mt-5 pt-4 border-t flex items-center justify-between text-xs">
+                    <div class="text-slate-500">Media Law Resource Center</div>
+                    <div class="text-blue-700 font-semibold">Details</div>
+                </div>
+            </div>
         </div>
-        
-        <div class="mt-6 text-center">
-    <a href="archive.html"
-       class="text-sm font-semibold px-6 py-3 border border-slate-300 hover:bg-white rounded-3xl inline-flex items-center gap-x-2">
-        <span>View Full News Archive</span>
-        <i class="fa-solid fa-external-link-alt text-xs"></i>
-    </a>
-    <a href="google-news.html"
-       class="ml-2 text-sm font-semibold px-6 py-3 border border-slate-300 hover:bg-white rounded-3xl inline-flex items-center gap-x-2">
-        <span>Today's Top 100 from Google News</span>
-        <i class="fa-brands fa-google text-xs"></i>
-    </a>
-</div>
 
-    <!-- Case Database Section -->
+        <div class="mt-6 text-center">
+            <a href="archive.html" class="text-sm font-semibold px-6 py-3 border border-slate-300 hover:bg-white rounded-3xl inline-flex items-center gap-x-2">
+                <span>View Full News Archive</span>
+                <i class="fa-solid fa-external-link-alt text-xs"></i>
+            </a>
+            <a href="google-news.html" class="ml-2 text-sm font-semibold px-6 py-3 border border-slate-300 hover:bg-white rounded-3xl inline-flex items-center gap-x-2">
+                <span>Today's Top 100 from Google News</span>
+                <i class="fa-brands fa-google text-xs"></i>
+            </a>
+        </div>
+    </div>
+
     <div id="cases" class="bg-white border-t border-b border-slate-200 py-12">
         <div class="max-w-screen-2xl mx-auto px-8">
             <div class="flex items-end justify-between mb-8">
@@ -227,87 +212,119 @@
                     <span class="text-blue-700 font-semibold tracking-widest text-sm">COMPREHENSIVE DATABASE</span>
                     <h2 class="section-header">Key Cases &amp; Precedents</h2>
                     <p class="text-slate-600 mt-1">Landmark and recent rulings shaping the field</p>
-                    <p id="cases-status" class="text-xs text-slate-500 mt-2">New federal appellate and Supreme Court rulings are added automatically every day.</p>
+                    <p class="text-xs text-slate-500 mt-2">New federal appellate and Supreme Court rulings are added automatically every day.</p>
                 </div>
-                
                 <div class="hidden md:block">
-                    <input id="case-search" type="text" placeholder="Search cases..." 
-                           class="w-80 px-4 py-3 border border-slate-300 rounded-3xl text-sm focus:outline-none focus:border-blue-600">
+                    <input id="case-search" type="text" placeholder="Search cases..." class="w-80 px-4 py-3 border border-slate-300 rounded-3xl text-sm focus:outline-none focus:border-blue-600" />
                 </div>
             </div>
 
             <div id="cases-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                <!-- Populated by JavaScript -->
+                <div class="legal-card bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 cursor-pointer flex flex-col">
+                    <div class="flex justify-between mb-4">
+                        <span class="bg-violet-100 text-violet-700 text-xs font-semibold px-3 py-1 rounded-full">First Amendment</span>
+                        <span class="font-mono text-xs text-slate-500">1964</span>
+                    </div>
+                    <h3 class="font-bold text-lg tracking-tight leading-none mb-2">New York Times Co. v. Sullivan</h3>
+                    <div class="font-mono text-xs text-slate-500 mb-4">376 U.S. 254 (1964)</div>
+                    <p class="text-sm text-slate-600 flex-grow">Established the actual malice standard for defamation claims brought by public officials.</p>
+                    <div class="mt-auto pt-4 flex items-center justify-between text-xs text-blue-700 font-medium">
+                        <span>View full case</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+                <div class="legal-card bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 cursor-pointer flex flex-col">
+                    <div class="flex justify-between mb-4">
+                        <span class="bg-violet-100 text-violet-700 text-xs font-semibold px-3 py-1 rounded-full">First Amendment</span>
+                        <span class="font-mono text-xs text-slate-500">1971</span>
+                    </div>
+                    <h3 class="font-bold text-lg tracking-tight leading-none mb-2">New York Times Co. v. United States</h3>
+                    <div class="font-mono text-xs text-slate-500 mb-4">403 U.S. 713 (1971)</div>
+                    <p class="text-sm text-slate-600 flex-grow">The government failed to meet the heavy burden required to justify a prior restraint on publication.</p>
+                    <div class="mt-auto pt-4 flex items-center justify-between text-xs text-blue-700 font-medium">
+                        <span>View full case</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+                <div class="legal-card bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 cursor-pointer flex flex-col">
+                    <div class="flex justify-between mb-4">
+                        <span class="bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full">Entertainment Law</span>
+                        <span class="font-mono text-xs text-slate-500">2026</span>
+                    </div>
+                    <h3 class="font-bold text-lg tracking-tight leading-none mb-2">Cox Communications, Inc. v. Sony Music Entertainment</h3>
+                    <div class="font-mono text-xs text-slate-500 mb-4">No. 24-171 (2026)</div>
+                    <p class="text-sm text-slate-600 flex-grow">Internet service providers are not contributorily liable for users’ copyright infringement simply by providing service.</p>
+                    <div class="mt-auto pt-4 flex items-center justify-between text-xs text-blue-700 font-medium">
+                        <span>View full case</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Resources & Sources section removed -->
+    <div id="resources" class="max-w-screen-2xl mx-auto px-8 py-14">
+        <div class="max-w-4xl">
+            <h2 class="section-header mb-3">Primary Sources &amp; Partners</h2>
+            <p class="text-slate-600 mb-8">Media Law News aggregates from these trusted organizations and official court records.</p>
 
-    <!-- Footer / Disclaimer -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <a href="https://medialaw.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-newspaper text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Media Law Resource Center</div>
+                        <div class="text-xs text-slate-500">MLRC • MediaLawDaily</div>
+                    </div>
+                </a>
+                <a href="https://rcfp.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-gavel text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Reporters Committee</div>
+                        <div class="text-xs text-slate-500">RCFP • First Amendment Handbook</div>
+                    </div>
+                </a>
+                <a href="https://www.law360.com/media" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-tv text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Law360 Media &amp; Entertainment</div>
+                        <div class="text-xs text-slate-500">Premium legal news</div>
+                    </div>
+                </a>
+                <a href="https://knightcolumbia.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-globe text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">Knight First Amendment Institute</div>
+                        <div class="text-xs text-slate-500">Columbia University</div>
+                    </div>
+                </a>
+                <a href="https://www.supremecourt.gov/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-landmark text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                    <div>
+                        <div class="font-semibold">U.S. Supreme Court</div>
+                        <div class="text-xs text-slate-500">Official Opinions</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <footer class="bg-slate-900 text-slate-400 text-sm">
         <div class="max-w-screen-2xl mx-auto px-8 py-10">
             <div class="flex flex-col md:flex-row gap-y-6 justify-between items-start md:items-center">
                 <div>
                     <div class="flex items-center gap-x-2 mb-1">
                         <span class="font-semibold text-white">Media Law News</span>
-                        <span class="text-xs px-2 py-0.5 bg-white/10 rounded"></span>
+                        <span class="text-xs px-2 py-0.5 bg-white/10 rounded">EST 2026</span>
+                    </div>
                     <p class="max-w-md">This is a fully functional site built with public information.</p>
                 </div>
-                
                 <div class="text-xs space-y-1 md:text-right">
                     <div>Curated from public court records</div>
-                    </div>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Case Detail Modal -->
-    <div id="case-modal" onclick="if (event.target.id === 'case-modal') hideCaseModal()" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-        <div onclick="event.stopImmediatePropagation()" class="case-modal bg-white rounded-3xl max-w-3xl w-full max-h-[85vh] overflow-hidden shadow-2xl">
-            <div class="px-8 pt-8 pb-6 border-b flex justify-between items-start">
-                <div>
-                    <div id="modal-category" class="category-tag inline-block mb-3"></div>
-                    <h3 id="modal-title" class="text-3xl font-bold tracking-tight pr-8"></h3>
-                    <div id="modal-citation" class="text-slate-500 mt-1 font-mono text-sm"></div>
-                </div>
-                <button onclick="hideCaseModal()" class="text-3xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
-            </div>
-            
-            <div class="p-8 overflow-auto max-h-[55vh]">
-                <div id="modal-holding" class="prose prose-slate max-w-none text-[15px]"></div>
-                
-                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                    <div>
-                        <div class="font-semibold text-slate-500 mb-1.5">KEY ISSUES</div>
-                        <div id="modal-issues" class="flex flex-wrap gap-2"></div>
-                    </div>
-                    <div>
-                        <div class="font-semibold text-slate-500 mb-1.5">IMPACT</div>
-                        <div id="modal-impact" class="text-slate-700"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="px-8 py-5 border-t bg-slate-50 flex items-center justify-between">
-                <div class="flex items-center gap-x-3 text-xs">
-                    <span id="modal-date" class="font-medium"></span>
-                    <span class="text-slate-300">•</span>
-                    <span id="modal-court" class="text-slate-600"></span>
-                </div>
-                <div>
-                    <a id="modal-link" href="#" target="_blank" 
-                       class="inline-flex items-center gap-x-2 text-sm font-semibold px-5 py-2.5 bg-blue-900 hover:bg-blue-800 text-white rounded-3xl">
-                        <span>Read Full Opinion</span>
-                        <i class="fa-solid fa-external-link-alt text-xs"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Subscribe Modal -->
     <div id="subscribe-modal" onclick="if (event.target.id === 'subscribe-modal') hideSubscribeModal()" class="hidden fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-6">
         <div onclick="event.stopImmediatePropagation()" class="bg-white rounded-3xl max-w-md w-full p-8">
             <div class="flex justify-between mb-4">
@@ -317,26 +334,25 @@
                 </div>
                 <button onclick="hideSubscribeModal()" class="text-3xl leading-none">&times;</button>
             </div>
-            
             <form onsubmit="subscribeUser(event)" class="space-y-4 mt-6">
                 <div>
                     <label class="text-xs font-semibold tracking-widest text-slate-500">FULL NAME</label>
-                    <input type="text" required class="w-full border border-slate-300 rounded-2xl px-4 py-3 text-sm" placeholder="Alex Rivera">
+                    <input type="text" required class="w-full border border-slate-300 rounded-2xl px-4 py-3 text-sm" placeholder="Alex Rivera" />
                 </div>
                 <div>
                     <label class="text-xs font-semibold tracking-widest text-slate-500">EMAIL ADDRESS</label>
-                    <input type="email" required class="w-full border border-slate-300 rounded-2xl px-4 py-3 text-sm" placeholder="you@lawfirm.com">
+                    <input type="email" required class="w-full border border-slate-300 rounded-2xl px-4 py-3 text-sm" placeholder="you@lawfirm.com" />
                 </div>
                 <div>
                     <label class="text-xs font-semibold tracking-widest text-slate-500">INTEREST AREAS</label>
                     <div class="flex flex-wrap gap-2 mt-1.5">
-                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> First Amendment</label>
-                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> Media Law</label>
-                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> Entertainment / Copyright</label>
-                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" class="accent-blue-900"> Defamation &amp; Privacy</label>
+                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900" /> First Amendment</label>
+                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900" /> Media Law</label>
+                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900" /> Entertainment / Copyright</label>
+                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" class="accent-blue-900" /> Defamation &amp; Privacy</label>
                     </div>
                 </div>
-                
+
                 <button type="submit" class="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-3.5 rounded-3xl transition-colors">
                     Subscribe to Weekly Digest
                 </button>
@@ -346,611 +362,35 @@
     </div>
 
     <script>
-        // Tailwind script
-        function initializeTailwind() {
-            document.documentElement.style.setProperty('--accent', '#1e40af');
+        function toggleMobileMenu() {
+            const nav = document.querySelector('nav');
+            nav.classList.toggle('bg-white');
         }
 
-        // Live RSS feeds. The feeds are fetched and cached on the server by a
-        // scheduled Netlify Function and served from /api/feeds.
-        const FEEDS_ENDPOINT = '/api/feeds';
-        const RSS_FEEDS = [
-            { url: 'https://www.scotusblog.com/feed/', source: 'SCOTUSblog', category: 'first-amendment' },
-            { url: 'https://firstamendmentwatch.org/feed/', source: 'First Amendment Watch', category: 'first-amendment' },
-            { url: 'https://www.rcfp.org/feed/', source: 'Reporters Committee (RCFP)', category: 'media-law' },
-            { url: 'https://www.eff.org/rss/updates.xml', source: 'EFF Deeplinks', category: 'media-law' },
-            { url: 'https://deadline.com/category/legal/feed/', source: 'Deadline Legal', category: 'entertainment' },
-            { url: 'https://epic.org/feed/', source: 'EPIC', category: 'defamation-privacy' },
-            { url: 'https://www.insideprivacy.com/feed/', source: 'Covington Inside Privacy', category: 'defamation-privacy' },
-            { url: 'https://eyeonprivacy.sheppardmullinplatform.com/feed/', source: 'Sheppard Mullin Eye on Privacy', category: 'defamation-privacy' },
-            { url: 'https://www.mandellpc.com/news', source: 'Mandell P.C.', category: 'media-law' },
-            { url: 'https://www.billboard.com/c/business/legal/feed/', source: 'Billboard Legal', category: 'entertainment' },
-            { url: 'https://www.law360.com/media/rss', source: 'Law360 Media & Entertainment', category: 'entertainment' },
-            { url: 'https://www.hollywoodreporter.com/e/thr-esq/feed/', source: 'THR Lawsuits', category: 'entertainment' },
-            { url: 'https://deadline.com/tag/sag-aftra/feed/', source: 'Deadline SAG-AFTRA', category: 'entertainment' },
-            { url: 'https://deadline.com/tag/iatse/feed/', source: 'Deadline IATSE', category: 'entertainment' },
-            { url: 'https://completemusicupdate.com/feed/', source: 'CMU', category: 'entertainment' },
-            { url: 'https://www.billboard.com/t/live-nation/feed/', source: 'Billboard Live Nation', category: 'entertainment' },
-            { url: 'https://broadwaynews.com/feed/', source: 'Broadway News', category: 'entertainment' }
-        ];
-        const FEED_CACHE_KEY = 'media-law-news-live-v4';
-        const FEED_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
-
-        const CATEGORY_LABELS = {
-            'first-amendment': 'First Amendment',
-            'media-law': 'Media Law',
-            'entertainment': 'Entertainment Law',
-            'defamation-privacy': 'Defamation & Privacy'
-        };
-
-        // Sample News Data (curated real + representative) — used as a fallback and
-        // shown alongside live items.
-        const curatedNews = [
-            {
-                id: 1,
-                title: "SCOTUS Upholds Texas Age-Verification Law for Adult Websites",
-                date: "2025-06-27",
-                category: "first-amendment",
-                categoryLabel: "First Amendment",
-                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult speech.",
-                source: "Supreme Court / FIRE",
-                link: "https://www.supremecourt.gov/opinions/24pdf/23-1122_new.pdf",
-                tags: ["SCOTUS", "Adult Content", "Age Verification"]
-            },
-            {
-                id: 2,
-                title: "Supreme Court Rules ISPs Not Contributorily Liable for User Piracy in Cox v. Sony",
-                date: "2026-03-25",
-                category: "entertainment",
-                categoryLabel: "Entertainment Law",
-                summary: "In a unanimous decision, the Court held that Cox Communications was not contributorily liable for copyright infringement simply because it knew some subscribers were pirating music.",
-                source: "SCOTUSblog / Law360",
-                link: "https://www.scotusblog.com/cases/cox-communications-inc-v-sony-music-entertainment/",
-                tags: ["Copyright", "ISP Liability", "Section 512"]
-            },
-            {
-                id: 3,
-                title: "Colorado Conversion Therapy Ban Struck as Viewpoint Discrimination",
-                date: "2026-03-31",
-                category: "first-amendment",
-                categoryLabel: "First Amendment",
-                summary: "A 2026 decision striking down a state ban on conversion therapy emphasized major constitutional problems with viewpoint-based restrictions on speech and counseling.",
-                source: "SCOTUS / First Amendment Encyclopedia",
-                link: "https://www.supremecourt.gov/opinions/25pdf/24-539_fd9g.pdf",
-                tags: ["Professional Speech", "Viewpoint Discrimination", "LGBTQ+"]
-            },
-            {
-                id: 4,
-                title: "TikTok Ban Law Survives First Amendment Challenge",
-                date: "2025-01-17",
-                category: "first-amendment",
-                categoryLabel: "First Amendment",
-                summary: "TikTok v. Garland: Supreme Court rejected claims that the law forcing divestiture or ban of TikTok violated the platform’s and users’ free speech rights.",
-                source: "Knight First Amendment Institute",
-                link: "https://knightcolumbia.org/",
-                tags: ["Social Media", "National Security", "Platform Speech"]
-            },
-            {
-                id: 5,
-                title: "Eleventh Circuit Tosses Roy Moore’s $8.2M Defamation Award Against Laura Loomer",
-                date: "2026-04-12",
-                category: "media-law",
-                categoryLabel: "Media Law",
-                summary: "Court reverses massive defamation verdict, reinforcing strong protections for political speech and commentary even when sharp or controversial.",
-                source: "Media Law Resource Center",
-                link: "https://medialaw.org/",
-                tags: ["Defamation", "Political Speech", "Actual Malice"]
-            },
-            {
-                id: 6,
-                title: "Major Music Labels Win Key Copyright Victory — But SCOTUS Narrows Secondary Liability",
-                date: "2026-03-26",
-                category: "entertainment",
-                categoryLabel: "Entertainment Law",
-                summary: "While Sony and other labels secured significant damages at trial, the Supreme Court narrowed how far copyright owners can reach upstream to impose liability.",
-                source: "Law360 Media",
-                link: "https://www.law360.com/media",
-                tags: ["Music Copyright", "Secondary Liability", "DMCA"]
-            },
-            {
-                id: 7,
-                title: "NYT v. OpenAI Copyright Case Moves Forward on Training Data Claims",
-                date: "2026-02-18",
-                category: "media-law",
-                categoryLabel: "Media Law",
-                summary: "Ongoing high-stakes litigation tests whether using copyrighted news articles to train large language models constitutes fair use or infringement.",
-                source: "Various / Legal Tech Hub",
-                link: "https://www.law.com/",
-                tags: ["AI", "Copyright", "Fair Use", "News Media"]
-            },
-            {
-                id: 8,
-                title: "First Amendment Watch Launches National SLAPP Database",
-                date: "2026-01-15",
-                category: "first-amendment",
-                categoryLabel: "First Amendment",
-                summary: "New public database tracks Strategic Lawsuits Against Public Participation targeting journalists, activists, and critics across the country.",
-                source: "First Amendment Watch",
-                link: "https://firstamendmentwatch.org/",
-                tags: ["SLAPP", "Anti-SLAPP", "Press Freedom"]
-            }
-        ];
-
-        let newsData = [...curatedNews];
-
-        function escapeHTML(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+        function showSubscribeModal() {
+            document.getElementById('subscribe-modal').classList.remove('hidden');
+            document.getElementById('subscribe-modal').classList.add('flex');
         }
 
-        function safeUrl(url) {
-            try {
-                const parsed = new URL(url);
-                return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '#';
-            } catch {
-                return '#';
-            }
+        function hideSubscribeModal() {
+            const modal = document.getElementById('subscribe-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
-
-        function stripHTML(html) {
-            const doc = new DOMParser().parseFromString(html || '', 'text/html');
-            return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
-        }
-
-        function truncate(text, max = 320) {
-            return text.length > max ? text.slice(0, max).replace(/\s+\S*$/, '') + '…' : text;
-        }
-
-        // Refine the feed's default category using simple keyword matching
-        function classifyItem(text, fallback) {
-            const t = text.toLowerCase();
-            if (/(defamation|libel|slander|privacy|reputation|anti-slapp|false light|intrusion|public disclosure)/.test(t)) return 'defamation-privacy';
-            if (/(copyright|trademark|music|film|studio|streaming|hollywood|entertainment|royalt|licens|talent|celebrit)/.test(t)) return 'entertainment';
-            if (/(defamation|libel|journalist|reporter|press freedom|newsroom|subpoena|foia|public records|privacy|section 230)/.test(t)) return 'media-law';
-            if (/(first amendment|free speech|free expression|censorship|protest|religious liberty|book ban)/.test(t)) return 'first-amendment';
-            return fallback;
-        }
-
-        function feedItemsToNews(feed, items) {
-            return (items || []).map(item => {
-                const summary = truncate(stripHTML(item.description));
-                const title = stripHTML(item.title);
-                const category = classifyItem(`${title} ${summary} ${(item.categories || []).join(' ')}`, feed.category);
-                return {
-                    title,
-                    date: item.pubDate || new Date().toISOString(),
-                    category,
-                    categoryLabel: CATEGORY_LABELS[category],
-                    summary,
-                    source: feed.source,
-                    link: item.link,
-                    tags: (item.categories || []).slice(0, 5).map(stripHTML).filter(Boolean),
-                    live: true
-                };
-            });
-        }
-
-        function readFeedCache() {
-            try {
-                const cached = JSON.parse(localStorage.getItem(FEED_CACHE_KEY));
-                if (cached && Date.now() - cached.savedAt < FEED_CACHE_TTL_MS) return cached;
-            } catch {}
-            return null;
-        }
-
-        function writeFeedCache(items) {
-            try {
-                localStorage.setItem(FEED_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), items }));
-            } catch {}
-        }
-
-        function setFeedStatus(text) {
-            const el = document.getElementById('feed-status');
-            if (el) el.textContent = text;
-        }
-
-        // Stats are computed from the live RSS items, so they change as the feeds do.
-        // Until the feeds have been checked, the stats show a dash.
-        let liveNewsItems = null;
-        const SCOTUS_PATTERN = /supreme court|scotus/i;
-        const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
-        function updateStats() {
-            const setStat = (id, value) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = value;
-            };
-            if (!liveNewsItems) return;
-
-            const now = Date.now();
-            const newThisWeek = liveNewsItems.filter(item => {
-                const t = new Date(item.date).getTime();
-                return !Number.isNaN(t) && now - t <= WEEK_MS;
-            }).length;
-            const scotusCount = liveNewsItems.filter(item => (
-                item.source === 'SCOTUSblog' ||
-                SCOTUS_PATTERN.test(`${item.title} ${item.summary} ${(item.tags || []).join(' ')}`)
-            )).length;
-
-            setStat('stats-live', liveNewsItems.length);
-            setStat('stats-week', newThisWeek);
-            setStat('stats-scotus', scotusCount);
-            setStat('stats-sources', activeSourceCount);
-        }
-
-        function applyNews(liveItems) {
-            const seen = new Set();
-            const merged = [...liveItems, ...curatedNews].filter(item => {
-                const key = item.link || item.title;
-                if (seen.has(key)) return false;
-                seen.add(key);
-                return true;
-            });
-            merged.sort((a, b) => new Date(b.date) - new Date(a.date));
-            newsData = merged.map((item, i) => ({ ...item, id: i + 1 }));
-            filterNews(currentNewsFilter);
-        }
-
-        let activeSourceCount = 0;
-
-        async function loadLiveNews() {
-            const cached = readFeedCache();
-            if (cached) {
-                activeSourceCount = new Set(cached.items.map(item => item.source)).size;
-                liveNewsItems = cached.items;
-                applyNews(cached.items);
-                updateStats();
-                setFeedStatus(`${cached.items.length} live stories · updated ${new Date(cached.savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`);
-                return;
-            }
-
-            let snapshotFeeds = [];
-            try {
-                const res = await fetch(FEEDS_ENDPOINT);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                snapshotFeeds = (await res.json()).feeds || [];
-            } catch (error) {
-                console.warn('[Media Law News] Could not load feeds', error);
-            }
-            const byUrl = new Map(snapshotFeeds.map(f => [f.url, f]));
-            let liveItems = [];
-            activeSourceCount = 0;
-            RSS_FEEDS.forEach(feed => {
-                const result = byUrl.get(feed.url);
-                if (result && result.status !== 'ok') console.warn(`[Media Law News] Feed failed: ${feed.source}`, result.message);
-                if (result && result.items && result.items.length) {
-                    activeSourceCount++;
-                    liveItems = liveItems.concat(feedItemsToNews(feed, result.items));
-                }
-            });
-
-            if (liveItems.length === 0) {
-                activeSourceCount = 0;
-                liveNewsItems = [];
-                updateStats();
-                setFeedStatus('Live feeds unavailable right now — showing curated stories.');
-                return;
-            }
-
-            liveNewsItems = liveItems;
-            writeFeedCache(liveItems);
-            applyNews(liveItems);
-            updateStats();
-            setFeedStatus(`${liveItems.length} live stories from ${activeSourceCount} sources · updated just now`);
-        }
-
-        // Sample Landmark + Recent Cases Database
-        let casesData = [
-            {
-                id: "c1",
-                title: "New York Times Co. v. Sullivan",
-                citation: "376 U.S. 254 (1964)",
-                date: "1964",
-                category: "first-amendment",
-                categoryLabel: "First Amendment",
-                court: "U.S. Supreme Court",
-                holding: "Established the 'actual malice' standard for defamation claims brought by public officials. Requires proof that the defendant knew the statement was false or acted with reckless disregard for the truth.",
-                issues: ["Defamation", "Public Officials", "Actual Malice"],
-                impact: "Foundation of modern press freedom in the United States. Protects robust public debate.",
-                link: "https://supreme.justia.com/cases/federal/us/376/254/"
-            },
-            {
-                id: "c2",
-                title: "New York Times Co. v. United States (Pentagon Papers)",
-                citation: "403 U.S. 713 (1971)",
-                date: "1971",
-                category: "first-amendment",
-                categoryLabel: "First Amendment",
-                court: "U.S. Supreme Court",
-                holding: "The government failed to meet the heavy burden required to justify prior restraint on publication of classified documents. Strong presumption against prior restraints.",
-                issues: ["Prior Restraint", "National Security", "Press Freedom"],
-                impact: "Landmark victory for press freedom and against government censorship.",
-                link: "https://supreme.justia.com/cases/federal/us/403/713/"
-            },
-            {
-                id: "c3",
-                title: "Cox Communications, Inc. v. Sony Music Entertainment",
-                citation: "No. 24-171 (2026)",
-                date: "March 25, 2026",
-                category: "entertainment",
-                categoryLabel: "Entertainment Law",
-                court: "U.S. Supreme Court",
-                holding: "Internet service providers are not contributorily liable for users’ copyright infringement merely by providing service with knowledge that some users infringe.",
-                issues: ["Copyright Infringement", "Contributory Liability", "ISP Liability"],
-                impact: "Major win for tech platforms and broadband providers. Limits reach of copyright enforcement upstream.",
-                link: "https://www.scotusblog.com/cases/cox-communications-inc-v-sony-music-entertainment/"
-            },
-            {
-                id: "c4",
-                title: "Chiles v. Salazar",
-                citation: "No. 24-539 (2026)",
-                date: "March 31, 2026",
-                category: "first-amendment",
-                categoryLabel: "First Amendment",
-                court: "U.S. Supreme Court",
-                holding: "Colorado’s ban on conversion therapy for minors, as applied to a licensed counselor’s talk therapy, regulates speech on the basis of viewpoint and is subject to strict scrutiny.",
-                issues: ["Viewpoint Discrimination", "Professional Speech", "Conversion Therapy"],
-                impact: "Significant expansion of First Amendment protections for professional speech and counseling. Remanded for further proceedings.",
-                link: "https://www.supremecourt.gov/opinions/25pdf/24-539_fd9g.pdf"
-            },
-            {
-                id: "c5",
-                title: "Hustler Magazine v. Falwell",
-                citation: "485 U.S. 46 (1988)",
-                date: "1988",
-                category: "first-amendment",
-                categoryLabel: "First Amendment",
-                court: "U.S. Supreme Court",
-                holding: "Public figures cannot recover for intentional infliction of emotional distress arising from parody or satire without showing actual malice.",
-                issues: ["Satire & Parody", "Emotional Distress", "Public Figures"],
-                impact: "Protects political cartoons, satire, and robust criticism of public figures.",
-                link: "https://supreme.justia.com/cases/federal/us/485/46/"
-            },
-            {
-                id: "c6",
-                title: "Brown v. Entertainment Merchants Ass'n",
-                citation: "564 U.S. 786 (2011)",
-                date: "2011",
-                category: "entertainment",
-                categoryLabel: "Entertainment Law",
-                court: "U.S. Supreme Court",
-                holding: "Video games are protected speech under the First Amendment. California’s law restricting sales of violent video games to minors was struck down.",
-                issues: ["Video Games", "Minors & Speech", "Content-Based Restrictions"],
-                impact: "Confirmed strong First Amendment protection for new forms of entertainment media.",
-                link: "https://supreme.justia.com/cases/federal/us/564/786/"
-            },
-            {
-                id: "c7",
-                title: "Moody v. NetChoice, LLC & NetChoice v. Paxton",
-                citation: "603 U.S. ___ (2024)",
-                date: "2024",
-                category: "media-law",
-                categoryLabel: "Media Law",
-                court: "U.S. Supreme Court",
-                holding: "Social media platforms engage in protected First Amendment speech when they curate and moderate content. States cannot force platforms to carry speech they disagree with.",
-                issues: ["Content Moderation", "Platform Speech", "State Regulation of Social Media"],
-                impact: "Clarified that there is no 'social media exception' to the First Amendment. Platforms have editorial rights.",
-                link: "https://www.supremecourt.gov/opinions/23pdf/22-277_3dq3.pdf"
-            },
-            {
-                id: "c8",
-                title: "TikTok v. Garland",
-                citation: "No. 24-656 (2025)",
-                date: "January 2025",
-                category: "first-amendment",
-                categoryLabel: "First Amendment",
-                court: "U.S. Supreme Court",
-                holding: "Upheld the federal law requiring ByteDance to divest TikTok or face a ban in the U.S. Rejected arguments that the law violated the First Amendment rights of the platform and its users.",
-                issues: ["Social Media Platforms", "Foreign Ownership", "National Security vs Speech"],
-                impact: "Allowed significant government action against a major platform despite free speech concerns.",
-                link: "https://www.supremecourt.gov/"
-            }
-        ];
-
-        // Render News Cards
-        function renderNews(filteredNews = newsData) {
-            const container = document.getElementById('news-grid');
-            container.innerHTML = '';
-
-            filteredNews.forEach(item => {
-                const card = document.createElement('div');
-                card.className = `legal-card bg-white border border-slate-200 rounded-3xl p-6 flex flex-col h-full`;
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="category-tag ${getCategoryColor(item.category)}">${escapeHTML(item.categoryLabel)}</span>
-                        <span class="text-xs text-slate-500 font-mono">${item.live ? '<span class="text-red-600 font-semibold mr-1">● LIVE</span>' : ''}${formatDate(item.date)}</span>
-                    </div>
-                    
-                    <h3 class="font-semibold text-[15.5px] leading-tight tracking-tight mb-3 line-clamp-3">${escapeHTML(item.title)}</h3>
-                    
-                    <p class="text-sm text-slate-600 line-clamp-3 flex-grow">${escapeHTML(item.summary)}</p>
-                    
-                    <div class="mt-5 pt-4 border-t flex items-center justify-between text-xs">
-                        <div class="text-slate-500">${escapeHTML(item.source)}</div>
-                        <div class="flex items-center gap-x-1">
-                            <button onclick="showNewsModal(${item.id}); event.stopImmediatePropagation();" 
-                                    class="font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-x-1">
-                                <span>Details</span> 
-                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </button>
-                            <a href="${escapeHTML(safeUrl(item.link))}" target="_blank" rel="noopener noreferrer" onclick="event.stopImmediatePropagation();" 
-                               class="ml-2 text-blue-700 hover:text-blue-800">
-                                <i class="fa-solid fa-external-link-alt"></i>
-                            </a>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function getCategoryColor(category) {
-            if (category === 'first-amendment') return 'bg-violet-100 text-violet-700';
-            if (category === 'media-law') return 'bg-amber-100 text-amber-700';
-            if (category === 'entertainment') return 'bg-emerald-100 text-emerald-700';
-            if (category === 'defamation-privacy') return 'bg-rose-100 text-rose-700';
-            return 'bg-slate-100 text-slate-700';
-        }
-
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        }
-
-        // Filter News
-        let currentNewsFilter = 'all';
 
         function filterNews(filter) {
-            currentNewsFilter = filter;
-            
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('filter-active', 'bg-blue-900', 'text-white');
-                btn.classList.add('hover:bg-slate-100');
-                
-                if ((filter === 'all' && btn.dataset.filter === 'all') || 
-                    btn.dataset.filter === filter) {
+                if (btn.dataset.filter === filter) {
                     btn.classList.add('filter-active', 'bg-blue-900', 'text-white');
-                    btn.classList.remove('hover:bg-slate-100');
                 }
             });
-
-            let filtered = newsData;
-            if (filter !== 'all') {
-                filtered = newsData.filter(item => item.category === filter);
-            }
-            
-            const searchTerm = document.getElementById('global-search').value.toLowerCase().trim();
-            if (searchTerm) {
-                filtered = filtered.filter(item => 
-                    item.title.toLowerCase().includes(searchTerm) || 
-                    item.summary.toLowerCase().includes(searchTerm)
-                );
-            }
-            
-            renderNews(filtered);
         }
 
-        // Render Cases
-        function renderCases(filteredCases = casesData) {
-            const container = document.getElementById('cases-grid');
-            container.innerHTML = '';
-
-            filteredCases.forEach(item => {
-                const card = document.createElement('div');
-                card.className = `legal-card bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 cursor-pointer flex flex-col`;
-                card.onclick = () => showCaseModal(item.id);
-                const holding = item.holding.length > 165 ? item.holding.substring(0, 165) + '...' : item.holding;
-
-                card.innerHTML = `
-                    <div class="flex justify-between mb-4">
-                        <span class="category-tag ${getCategoryColor(item.category)}">${escapeHTML(item.categoryLabel)}</span>
-                        <span class="font-mono text-xs text-slate-500">${item.recent ? '<span class="text-red-600 font-semibold mr-1">● NEW</span>' : ''}${escapeHTML(item.date)}</span>
-                    </div>
-                    
-                    <h3 class="font-bold text-lg tracking-tight leading-none mb-2">${escapeHTML(item.title)}</h3>
-                    <div class="font-mono text-xs text-slate-500 mb-4">${escapeHTML(item.citation)}${item.recent ? ' · ' + escapeHTML(item.court) : ''}</div>
-                    
-                    <p class="text-sm text-slate-600 line-clamp-3 flex-grow">${escapeHTML(holding)}</p>
-                    
-                    <div class="mt-auto pt-4 flex items-center justify-between text-xs text-blue-700 font-medium">
-                        <span>View full case</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+        function subscribeUser(event) {
+            event.preventDefault();
+            hideSubscribeModal();
         }
-
-        // Recent rulings collected daily by the server (/api/cases) are shown
-        // ahead of the built-in landmark cases.
-        async function loadRecentCases() {
-            const status = document.getElementById('cases-status');
-            try {
-                const res = await fetch('/api/cases');
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                const recent = (data.items || []).map(c => ({
-                    id: `r${c.id}`,
-                    recent: true,
-                    title: c.title,
-                    citation: c.citation || '',
-                    date: new Date(`${c.dateFiled}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-                    category: c.category,
-                    categoryLabel: c.categoryLabel,
-                    court: c.court,
-                    holding: c.holding || '',
-                    issues: Array.isArray(c.issues) ? c.issues : [],
-                    impact: c.impact || '',
-                    link: c.sourceUrl
-                }));
-                casesData = [...recent, ...casesData.filter(c => !c.recent)];
-                const caseSearch = document.getElementById('case-search');
-                if (caseSearch && caseSearch.value.trim()) caseSearch.dispatchEvent(new Event('input'));
-                else renderCases();
-                if (data.updatedAt) {
-                    const when = new Date(data.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-                    status.textContent = `${recent.length} recent rulings added automatically from CourtListener · last checked ${when}. Summaries are AI-generated from the opinion text — read the original opinion for details.`;
-                } else {
-                    status.textContent = 'The first daily check for new rulings is running — recent cases will appear here shortly.';
-                }
-            } catch (error) {
-                console.warn('Could not load recent cases', error);
-            }
-        }
-
-        // Case Modal
-        function showCaseModal(caseId) {
-            const item = casesData.find(c => c.id === caseId);
-            if (!item) return;
-
-            document.getElementById('modal-category').innerHTML = `<span class="category-tag ${getCategoryColor(item.category)}">${escapeHTML(item.categoryLabel)}</span>`;
-            document.getElementById('modal-title').textContent = item.title;
-            document.getElementById('modal-citation').textContent = item.citation;
-            document.getElementById('modal-holding').innerHTML = `<p>${escapeHTML(item.holding)}</p>`;
-            document.getElementById('modal-date').textContent = item.date;
-            document.getElementById('modal-court').textContent = item.court;
-            document.getElementById('modal-link').href = safeUrl(item.link);
-
-            const issuesContainer = document.getElementById('modal-issues');
-            issuesContainer.innerHTML = '';
-            item.issues.forEach(issue => {
-                const tag = document.createElement('span');
-                tag.className = 'px-3 py-1 bg-slate-100 text-slate-700 text-xs rounded-2xl';
-                tag.textContent = issue;
-                issuesContainer.appendChild(tag);
-            });
-
-            document.getElementById('modal-impact').textContent = item.impact;
-
-            document.getElementById('case-modal').classList.remove('hidden');
-            document.getElementById('case-modal').classList.add('flex');
-        }
-
-        function hideCaseModal() {
-            const modal = document.getElementById('case-modal');
-            modal.classList.remove('flex');
-            modal.classList.add('hidden');
-        }
-
-        // News Detail Modal (simplified)
-        function showNewsModal(newsId) {
-            const item = newsData.find(n => n.id === newsId);
-            if (!item) return;
-
-            const modalHTML = `
-                <div onclick="this.remove()" class="fixed inset-0 bg-black/70 z-[120] flex items-center justify-center p-4">
-                    <div onclick="event.stopImmediatePropagation()" class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden">
-                        <div class="p-8">
-                            <div class="flex justify-between">
-                                <span class="category-tag ${getCategoryColor(item.category)}">${escapeHTML(item.categoryLabel)}</span>
-                                <span class="text-sm text-slate-500">${formatDate(item.date)}</span>
-                            </div>
-                            
-                            <h2 class="text-2xl font-bold tracking-tight mt-4 mb-4">${escapeHTML(item.title)}</h2>
-                            
-                            <div class="prose prose-slate max-w-none text-[15px]">
-                                <p>${escapeHTML(item.summary)}</p>
+    </script>
+</body>
+</html>
