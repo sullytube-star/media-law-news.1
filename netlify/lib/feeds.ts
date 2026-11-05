@@ -17,6 +17,14 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat }[] = [
   { url: 'https://www.insideprivacy.com/feed/', source: 'Covington Inside Privacy' },
   { url: 'https://eyeonprivacy.sheppardmullinplatform.com/feed/', source: 'Sheppard Mullin Eye on Privacy' },
   { url: 'https://harvardlawreview.org/feed/', source: 'Harvard Law Review' },
+  { url: 'https://www.billboard.com/c/business/legal/feed/', source: 'Billboard Legal' },
+  { url: 'https://www.law360.com/media/rss', source: 'Law360 Media & Entertainment' },
+  { url: 'https://www.hollywoodreporter.com/e/thr-esq/feed/', source: 'THR Lawsuits' },
+  { url: 'https://deadline.com/tag/sag-aftra/feed/', source: 'Deadline SAG-AFTRA' },
+  { url: 'https://deadline.com/tag/iatse/feed/', source: 'Deadline IATSE' },
+  { url: 'https://completemusicupdate.com/feed/', source: 'CMU' },
+  { url: 'https://www.billboard.com/t/live-nation/feed/', source: 'Billboard Live Nation' },
+  { url: 'https://broadwaynews.com/feed/', source: 'Broadway News' },
   { url: 'https://www.mandellpc.com/news', source: 'Mandell P.C.', format: 'mandell-html' },
 ]
 
