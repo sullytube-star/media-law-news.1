@@ -92,7 +92,7 @@
                     <a href="#news" class="hover:text-blue-700 transition-colors">News Feed</a>
                     <a href="google-news.html" class="hover:text-blue-700 transition-colors">Google News Daily</a>
                     <a href="#cases" class="hover:text-blue-700 transition-colors">Case Database</a>
-                    <a href="#resources" class="hover:text-blue-700 transition-colors">Resources</a>
+                    <a href="archive.html" class="hover:text-blue-700 transition-colors">Archive</a>
                 </div>
 
                 <div class="flex items-center gap-x-3">
@@ -242,51 +242,7 @@
         </div>
     </div>
 
-    <!-- Resources & Sources -->
-    <div id="resources" class="max-w-screen-2xl mx-auto px-8 py-14">
-        <div class="max-w-4xl">
-            <h2 class="section-header mb-3">Primary Sources &amp; Partners</h2>
-            <p class="text-slate-600 mb-8">Media Law News aggregates from these trusted organizations and official court records.</p>
-            
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <a href="https://medialaw.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-newspaper text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="font-semibold">Media Law Resource Center</div>
-                        <div class="text-xs text-slate-500">MLRC • MediaLawDaily</div>
-                    </div>
-                </a>
-                <a href="https://rcfp.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-gavel text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="font-semibold">Reporters Committee</div>
-                        <div class="text-xs text-slate-500">RCFP • First Amendment Handbook</div>
-                    </div>
-                </a>
-                <a href="https://www.law360.com/media" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-tv text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="font-semibold">Law360 Media &amp; Entertainment</div>
-                        <div class="text-xs text-slate-500">Premium legal news</div>
-                    </div>
-                </a>
-                <a href="https://knightcolumbia.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-globe text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="font-semibold">Knight First Amendment Institute</div>
-                        <div class="text-xs text-slate-500">Columbia University</div>
-                    </div>
-                </a>
-                <a href="https://www.supremecourt.gov/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-landmark text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
-                    <div>
-                        <div class="font-semibold">U.S. Supreme Court</div>
-                        <div class="text-xs text-slate-500">Official Opinions</div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
+    <!-- Resources & Sources section removed -->
 
     <!-- Footer / Disclaimer -->
     <footer class="bg-slate-900 text-slate-400 text-sm">
@@ -436,7 +392,7 @@
                 date: "2025-06-27",
                 category: "first-amendment",
                 categoryLabel: "First Amendment",
-                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult speech and age-based content restrictions.",
+                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult speech.",
                 source: "Supreme Court / FIRE",
                 link: "https://www.supremecourt.gov/opinions/24pdf/23-1122_new.pdf",
                 tags: ["SCOTUS", "Adult Content", "Age Verification"]
@@ -937,7 +893,7 @@
                 else renderCases();
                 if (data.updatedAt) {
                     const when = new Date(data.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-                    status.textContent = `${recent.length} recent rulings added automatically from CourtListener · last checked ${when}. Summaries are AI-generated from the opinion text — read the full opinion before relying on them.`;
+                    status.textContent = `${recent.length} recent rulings added automatically from CourtListener · last checked ${when}. Summaries are AI-generated from the opinion text — read the original opinion for details.`;
                 } else {
                     status.textContent = 'The first daily check for new rulings is running — recent cases will appear here shortly.';
                 }
@@ -998,122 +954,3 @@
                             
                             <div class="prose prose-slate max-w-none text-[15px]">
                                 <p>${escapeHTML(item.summary)}</p>
-                                ${item.tags && item.tags.length ? `<p class="mt-4 text-sm"><strong>Key Tags:</strong> ${escapeHTML(item.tags.join(' • '))}</p>` : ''}
-                            </div>
-                        </div>
-                        
-                        <div class="px-8 py-5 bg-slate-50 border-t flex items-center justify-between text-sm">
-                            <div class="text-slate-600">Source: <span class="font-medium">${escapeHTML(item.source)}</span></div>
-                            <a href="${escapeHTML(safeUrl(item.link))}" target="_blank" rel="noopener noreferrer" class="font-semibold flex items-center gap-x-2 text-blue-700">
-                                Read full coverage <i class="fa-solid fa-external-link-alt ml-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-        }
-
-        // Global Search
-        function setupGlobalSearch() {
-            const searchInput = document.getElementById('global-search');
-            
-            searchInput.addEventListener('input', () => {
-                const term = searchInput.value.toLowerCase().trim();
-                
-                let filteredNews = newsData;
-                if (currentNewsFilter !== 'all') {
-                    filteredNews = newsData.filter(n => n.category === currentNewsFilter);
-                }
-                if (term) {
-                    filteredNews = filteredNews.filter(n => 
-                        n.title.toLowerCase().includes(term) || 
-                        n.summary.toLowerCase().includes(term) ||
-                        n.tags.join(' ').toLowerCase().includes(term)
-                    );
-                }
-                renderNews(filteredNews);
-
-                let filteredCases = casesData;
-                if (term) {
-                    filteredCases = casesData.filter(c => 
-                        c.title.toLowerCase().includes(term) || 
-                        c.holding.toLowerCase().includes(term) ||
-                        c.issues.join(' ').toLowerCase().includes(term)
-                    );
-                }
-                renderCases(filteredCases);
-            });
-
-            const caseSearch = document.getElementById('case-search');
-            if (caseSearch) {
-                caseSearch.addEventListener('input', () => {
-                    const term = caseSearch.value.toLowerCase().trim();
-                    let filtered = casesData;
-                    if (term) {
-                        filtered = casesData.filter(c => 
-                            c.title.toLowerCase().includes(term) || 
-                            c.holding.toLowerCase().includes(term)
-                        );
-                    }
-                    renderCases(filtered);
-                });
-            }
-        }
-
-        // Subscribe
-        function showSubscribeModal() {
-            document.getElementById('subscribe-modal').classList.remove('hidden');
-            document.getElementById('subscribe-modal').classList.add('flex');
-        }
-
-        function hideSubscribeModal() {
-            const modal = document.getElementById('subscribe-modal');
-            modal.classList.remove('flex');
-            modal.classList.add('hidden');
-        }
-
-        function subscribeUser(e) {
-            e.preventDefault();
-            const modal = document.getElementById('subscribe-modal');
-            modal.innerHTML = `
-                <div class="bg-white rounded-3xl max-w-md w-full p-8 text-center">
-                    <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa-solid fa-check text-2xl"></i>
-                    </div>
-                    <h4 class="font-bold text-2xl">You're on the list!</h4>
-                    <p class="text-slate-600 mt-2">Thanks for subscribing to the Media Law News weekly digest.</p>
-                    <button onclick="hideSubscribeModal()" class="mt-6 px-6 py-3 bg-blue-900 text-white rounded-3xl">Close</button>
-                </div>
-            `;
-        }
-
-        function toggleMobileMenu() {
-            const existing = document.getElementById('mobile-menu');
-            if (existing) {
-                existing.remove();
-                return;
-            }
-            const menu = document.createElement('div');
-            menu.id = 'mobile-menu';
-            menu.className = 'md:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-200 p-6 flex flex-col gap-4 text-sm font-medium';
-            menu.innerHTML = `
-                <a href="#news" onclick="this.parentElement.remove()">News Feed</a>
-                <a href="google-news.html">Google News Daily</a>
-                <a href="#cases" onclick="this.parentElement.remove()">Case Database</a>
-            `;
-            document.querySelector('nav').appendChild(menu);
-        }
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeTailwind();
-            setupGlobalSearch();
-            renderNews();
-            renderCases();
-            loadLiveNews();
-            loadRecentCases();
-        });
-    </script>
-</body>
-</html>
