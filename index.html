@@ -81,7 +81,7 @@ This is a fully functional static prototype built with public information. For p
                             <i class="fa-solid fa-balance-scale text-white text-3xl"></i>
                         </div>
                         <div>
-                            <span class="font-bold text-3xl tracking-tighter">MediaLex</span>
+                            <span class="font-bold text-3xl tracking-tighter">Media Law News</span>
                             <span class="text-xs font-mono text-slate-500 block -mt-1">EST 2026</span>
                         </div>
                     </div>
@@ -409,7 +409,7 @@ This is a fully functional static prototype built with public information. For p
             { url: 'https://www.eff.org/rss/updates.xml', source: 'EFF Deeplinks', category: 'media-law' },
             { url: 'https://www.hollywoodreporter.com/t/thr-esq/feed/', source: 'The Hollywood Reporter', category: 'entertainment' }
         ];
-        const FEED_CACHE_KEY = 'medialex-live-news-v1';
+        const FEED_CACHE_KEY = 'media-law-news-live-v1';
         const FEED_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
         const CATEGORY_LABELS = {
@@ -427,7 +427,7 @@ This is a fully functional static prototype built with public information. For p
                 date: "2025-06-27",
                 category: "first-amendment",
                 categoryLabel: "First Amendment",
-                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult entertainment industry and free speech doctrine.",
+                summary: "In Free Speech Coalition v. Paxton, the Court upheld Texas’s requirement that users verify age before accessing pornographic content. Major implications for online adult entertainment and age gate enforcement.",
                 source: "Supreme Court / FIRE",
                 link: "https://www.supremecourt.gov/opinions/24pdf/23-1122_new.pdf",
                 tags: ["SCOTUS", "Adult Content", "Age Verification"]
@@ -438,7 +438,7 @@ This is a fully functional static prototype built with public information. For p
                 date: "2026-03-25",
                 category: "entertainment",
                 categoryLabel: "Entertainment Law",
-                summary: "In a unanimous decision, the Court held that Cox Communications was not contributorily liable for copyright infringement simply because it knew some subscribers were pirating music. Requires affirmative intent or tailored service.",
+                summary: "In a unanimous decision, the Court held that Cox Communications was not contributorily liable for copyright infringement simply because it knew some subscribers were pirating copyrighted material.",
                 source: "SCOTUSblog / Law360",
                 link: "https://www.scotusblog.com/cases/cox-communications-inc-v-sony-music-entertainment/",
                 tags: ["Copyright", "ISP Liability", "Section 512"]
@@ -449,7 +449,7 @@ This is a fully functional static prototype built with public information. For p
                 date: "2026-03-31",
                 category: "first-amendment",
                 categoryLabel: "First Amendment",
-                summary: "Chiles v. Salazar: 8-1 decision holds that Colorado’s ban on conversion therapy for minors, as applied to licensed counselor’s talk therapy, constitutes viewpoint discrimination requiring strict scrutiny.",
+                summary: "Chiles v. Salazar: 8-1 decision holds that Colorado’s ban on conversion therapy for minors, as applied to licensed counselor’s talk therapy, constitutes viewpoint discrimination.",
                 source: "SCOTUS / First Amendment Encyclopedia",
                 link: "https://www.supremecourt.gov/opinions/25pdf/24-539_fd9g.pdf",
                 tags: ["Professional Speech", "Viewpoint Discrimination", "LGBTQ+"]
@@ -482,7 +482,7 @@ This is a fully functional static prototype built with public information. For p
                 date: "2026-03-26",
                 category: "entertainment",
                 categoryLabel: "Entertainment Law",
-                summary: "While Sony and other labels secured significant damages at trial, the Supreme Court’s Cox decision significantly limits how far copyright owners can reach upstream to hold service providers accountable.",
+                summary: "While Sony and other labels secured significant damages at trial, the Supreme Court’s Cox decision significantly limits how far copyright owners can reach upstream to hold service providers liable.",
                 source: "Law360 Media",
                 link: "https://www.law360.com/media",
                 tags: ["Music Copyright", "Secondary Liability", "DMCA"]
@@ -493,7 +493,7 @@ This is a fully functional static prototype built with public information. For p
                 date: "2026-02-18",
                 category: "media-law",
                 categoryLabel: "Media Law",
-                summary: "Ongoing high-stakes litigation tests whether using copyrighted news articles to train large language models constitutes fair use or infringement. Key fair use and transformative use issues.",
+                summary: "Ongoing high-stakes litigation tests whether using copyrighted news articles to train large language models constitutes fair use or infringement.",
                 source: "Various / Legal Tech Hub",
                 link: "https://www.law.com/",
                 tags: ["AI", "Copyright", "Fair Use", "News Media"]
@@ -617,7 +617,7 @@ This is a fully functional static prototype built with public information. For p
             const liveItems = results.filter(r => r.status === 'fulfilled').flatMap(r => r.value);
             const failed = results.filter(r => r.status === 'rejected').length;
             results.forEach((r, i) => {
-                if (r.status === 'rejected') console.warn(`[MediaLex] Feed failed: ${RSS_FEEDS[i].source}`, r.reason);
+                if (r.status === 'rejected') console.warn(`[Media Law News] Feed failed: ${RSS_FEEDS[i].source}`, r.reason);
             });
 
             if (liveItems.length === 0) {
@@ -666,7 +666,7 @@ This is a fully functional static prototype built with public information. For p
                 category: "entertainment",
                 categoryLabel: "Entertainment Law",
                 court: "U.S. Supreme Court",
-                holding: "Internet service providers are not contributorily liable for users’ copyright infringement merely by providing service with knowledge that some users infringe. Liability requires intent to induce infringement or a service tailored for infringement.",
+                holding: "Internet service providers are not contributorily liable for users’ copyright infringement merely by providing service with knowledge that some users infringe. Liability remains limited absent direct participation or specific inducement.",
                 issues: ["Copyright Infringement", "Contributory Liability", "ISP Liability"],
                 impact: "Major win for tech platforms and broadband providers. Limits reach of copyright enforcement upstream.",
                 link: "https://www.scotusblog.com/cases/cox-communications-inc-v-sony-music-entertainment/"
@@ -679,7 +679,7 @@ This is a fully functional static prototype built with public information. For p
                 category: "first-amendment",
                 categoryLabel: "First Amendment",
                 court: "U.S. Supreme Court",
-                holding: "Colorado’s ban on conversion therapy for minors, as applied to a licensed counselor’s talk therapy, regulates speech on the basis of viewpoint and is subject to strict scrutiny under the First Amendment.",
+                holding: "Colorado’s ban on conversion therapy for minors, as applied to a licensed counselor’s talk therapy, regulates speech on the basis of viewpoint and is subject to strict scrutiny.",
                 issues: ["Viewpoint Discrimination", "Professional Speech", "Conversion Therapy"],
                 impact: "Significant expansion of First Amendment protections for professional speech and counseling. Remanded for further proceedings.",
                 link: "https://www.supremecourt.gov/opinions/25pdf/24-539_fd9g.pdf"
@@ -1002,27 +1002,19 @@ This is a fully functional static prototype built with public information. For p
             }, 3000);
         }
 
-        // Filter button active state helper
         function setupFilterButtons() {
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // The filterNews function already handles styling
-                });
+                btn.addEventListener('click', () => filterNews(btn.dataset.filter));
             });
-            
-            // Set initial active
-            const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
-            if (allBtn) allBtn.classList.add('filter-active', 'bg-blue-900', 'text-white');
         }
 
-        // Mobile menu
         function toggleMobileMenu() {
             const nav = document.createElement('div');
             nav.className = `fixed inset-0 bg-black/60 z-[200] md:hidden`;
             nav.innerHTML = `
                 <div class="bg-white w-72 h-full p-6" onclick="event.stopImmediatePropagation()">
                     <div class="flex justify-between mb-8">
-                        <span class="font-bold text-2xl">MediaLex</span>
+                        <span class="font-bold text-2xl">Media Law News</span>
                         <button onclick="this.closest('.fixed').remove()" class="text-3xl">&times;</button>
                     </div>
                     
@@ -1054,14 +1046,14 @@ This is a fully functional static prototype built with public information. For p
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'medialex_data_export.json';
+            a.download = 'media-law-news_data_export.json';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
-          // Initialize everything
+        // Initialize everything
         function initialize() {
             initializeTailwind();
             
@@ -1089,34 +1081,11 @@ This is a fully functional static prototype built with public information. For p
             });
 
             // Easter egg / tip
-            console.log('%c[MediaLex] Static prototype ready. Press "/" to focus search. All data is public-domain curated.', 'color:#64748b');
-            
-            // Optional: Pre-filter hint
-            // setTimeout(() => { console.log('%cTip: Try filtering by category or searching "TikTok" or "copyright"', 'color:#94a3b8'); }, 12000);
+            console.log('%c[Media Law News] Static prototype ready. Press "/" to focus search. All data is public-domain curated.', 'color:#64748b');
         }
 
         // Boot app
         window.onload = initialize;
     </script>
 </body>
-    <script>
-function updateTimestamp() {
-    const now = new Date();
-
-    const formatted = now.toLocaleString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        timeZoneName: "short"
-    });
-
-    document.getElementById("last-updated").innerHTML =
-        '<span class="w-2 h-2 bg-green-400 rounded-full"></span>' +
-        '<span>UPDATED ' + formatted.toUpperCase() + '</span>';
-}
-
-updateTimestamp();
-</script>
 </html>
