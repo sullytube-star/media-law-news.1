@@ -227,6 +227,7 @@
                     <span class="text-blue-700 font-semibold tracking-widest text-sm">COMPREHENSIVE DATABASE</span>
                     <h2 class="section-header">Key Cases &amp; Precedents</h2>
                     <p class="text-slate-600 mt-1">Landmark and recent rulings shaping the field</p>
+                    <p id="cases-status" class="text-xs text-slate-500 mt-2">New federal appellate and Supreme Court rulings are added automatically every day.</p>
                 </div>
                 
                 <div class="hidden md:block">
@@ -687,7 +688,7 @@
         }
 
         // Sample Landmark + Recent Cases Database
-        const casesData = [
+        let casesData = [
             {
                 id: "c1",
                 title: "New York Times Co. v. Sullivan",
@@ -886,17 +887,18 @@
                 const card = document.createElement('div');
                 card.className = `legal-card bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 cursor-pointer flex flex-col`;
                 card.onclick = () => showCaseModal(item.id);
-                
+                const holding = item.holding.length > 165 ? item.holding.substring(0, 165) + '...' : item.holding;
+
                 card.innerHTML = `
                     <div class="flex justify-between mb-4">
-                        <span class="category-tag ${getCategoryColor(item.category)}">${item.categoryLabel}</span>
-                        <span class="font-mono text-xs text-slate-500">${item.date}</span>
+                        <span class="category-tag ${getCategoryColor(item.category)}">${escapeHTML(item.categoryLabel)}</span>
+                        <span class="font-mono text-xs text-slate-500">${item.recent ? '<span class="text-red-600 font-semibold mr-1">● NEW</span>' : ''}${escapeHTML(item.date)}</span>
                     </div>
                     
-                    <h3 class="font-bold text-lg tracking-tight leading-none mb-2">${item.title}</h3>
-                    <div class="font-mono text-xs text-slate-500 mb-4">${item.citation}</div>
+                    <h3 class="font-bold text-lg tracking-tight leading-none mb-2">${escapeHTML(item.title)}</h3>
+                    <div class="font-mono text-xs text-slate-500 mb-4">${escapeHTML(item.citation)}${item.recent ? ' · ' + escapeHTML(item.court) : ''}</div>
                     
-                    <p class="text-sm text-slate-600 line-clamp-3 flex-grow">${item.holding.substring(0, 165)}...</p>
+                    <p class="text-sm text-slate-600 line-clamp-3 flex-grow">${escapeHTML(holding)}</p>
                     
                     <div class="mt-auto pt-4 flex items-center justify-between text-xs text-blue-700 font-medium">
                         <span>View full case</span>
@@ -907,18 +909,55 @@
             });
         }
 
+        // Recent rulings collected daily by the server (/api/cases) are shown
+        // ahead of the built-in landmark cases.
+        async function loadRecentCases() {
+            const status = document.getElementById('cases-status');
+            try {
+                const res = await fetch('/api/cases');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const recent = (data.items || []).map(c => ({
+                    id: `r${c.id}`,
+                    recent: true,
+                    title: c.title,
+                    citation: c.citation || '',
+                    date: new Date(`${c.dateFiled}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+                    category: c.category,
+                    categoryLabel: c.categoryLabel,
+                    court: c.court,
+                    holding: c.holding || '',
+                    issues: Array.isArray(c.issues) ? c.issues : [],
+                    impact: c.impact || '',
+                    link: c.sourceUrl
+                }));
+                casesData = [...recent, ...casesData.filter(c => !c.recent)];
+                const caseSearch = document.getElementById('case-search');
+                if (caseSearch && caseSearch.value.trim()) caseSearch.dispatchEvent(new Event('input'));
+                else renderCases();
+                if (data.updatedAt) {
+                    const when = new Date(data.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+                    status.textContent = `${recent.length} recent rulings added automatically from CourtListener · last checked ${when}. Summaries are AI-generated from the opinion text — read the full opinion before relying on them.`;
+                } else {
+                    status.textContent = 'The first daily check for new rulings is running — recent cases will appear here shortly.';
+                }
+            } catch (error) {
+                console.warn('Could not load recent cases', error);
+            }
+        }
+
         // Case Modal
         function showCaseModal(caseId) {
             const item = casesData.find(c => c.id === caseId);
             if (!item) return;
 
-            document.getElementById('modal-category').innerHTML = `<span class="category-tag ${getCategoryColor(item.category)}">${item.categoryLabel}</span>`;
+            document.getElementById('modal-category').innerHTML = `<span class="category-tag ${getCategoryColor(item.category)}">${escapeHTML(item.categoryLabel)}</span>`;
             document.getElementById('modal-title').textContent = item.title;
             document.getElementById('modal-citation').textContent = item.citation;
-            document.getElementById('modal-holding').innerHTML = `<p>${item.holding}</p>`;
+            document.getElementById('modal-holding').innerHTML = `<p>${escapeHTML(item.holding)}</p>`;
             document.getElementById('modal-date').textContent = item.date;
             document.getElementById('modal-court').textContent = item.court;
-            document.getElementById('modal-link').href = item.link;
+            document.getElementById('modal-link').href = safeUrl(item.link);
 
             const issuesContainer = document.getElementById('modal-issues');
             issuesContainer.innerHTML = '';
@@ -1073,6 +1112,7 @@
             renderNews();
             renderCases();
             loadLiveNews();
+            loadRecentCases();
         });
     </script>
 </body>
