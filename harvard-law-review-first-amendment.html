@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harvard Law Review — First Amendment Feed | Media Law News</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <main class="mx-auto max-w-5xl px-6 py-10">
+    <a class="text-sm font-semibold text-blue-800 hover:underline" href="index.html">&larr; Back to Media Law News</a>
+    <header class="mt-8">
+      <p class="text-sm font-semibold uppercase tracking-widest text-blue-700">First Amendment source</p>
+      <h1 class="mt-2 text-4xl font-bold tracking-tight">Harvard Law Review</h1>
+      <p class="mt-3 max-w-3xl text-slate-600">Recent Harvard Law Review articles matching First Amendment and free-expression topics. Harvard Law Review provides a general RSS feed rather than a dedicated topic feed, so this page filters the general feed for relevant terms.</p>
+      <a class="mt-3 inline-block text-sm font-semibold text-blue-800 hover:underline" href="https://harvardlawreview.org/topics/first-amendment/" target="_blank" rel="noopener noreferrer">Visit the First Amendment topic page</a>
+    </header>
+
+    <section class="mt-8 rounded-2xl border border-slate-200 bg-white p-5" aria-live="polite">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <p id="status" class="text-sm text-slate-600">Loading Harvard Law Review articles…</p>
+        <button id="retry" class="rounded-xl bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Refresh</button>
+      </div>
+      <div id="articles" class="mt-5 space-y-4"></div>
+    </section>
+  </main>
+
+  <script>
+    const RSS_URL = 'https://harvardlawreview.org/feed/';
+    const RSS2JSON_ENDPOINT = 'https://api.rss2json.com/v1/api.json?rss_url=';
+    const TOPIC_TERMS = /first amendment|free speech|freedom of speech|free expression|freedom of expression|press freedom|freedom of the press|speech clause|expressive conduct|prior restraint|censorship/i;
+    const articlesEl = document.getElementById('articles');
+    const statusEl = document.getElementById('status');
+
+    function plainText(value) {
+      const doc = new DOMParser().parseFromString(value || '', 'text/html');
+      return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+
+    async function loadArticles() {
+      statusEl.textContent = 'Loading Harvard Law Review articles…';
+      articlesEl.replaceChildren();
+      try {
+        const response = await fetch(RSS2JSON_ENDPOINT + encodeURIComponent(RSS_URL));
+        if (!response.ok) throw new Error(`Feed request failed (${response.status})`);
+        const data = await response.json();
+        if (data.status !== 'ok') throw new Error(data.message || 'Feed is unavailable');
+
+        const matches = (data.items || []).map(item => ({
+          title: plainText(item.title),
+          summary: plainText(item.description || item.content),
+          date: item.pubDate || '',
+          link: item.link
+        })).filter(item => TOPIC_TERMS.test(`${item.title} ${item.summary}`));
+
+        if (!matches.length) {
+          statusEl.textContent = 'No matching First Amendment articles were found in the latest general feed items. Visit the topic page for the full listing.';
+          return;
+        }
+
+        matches.forEach(item => {
+          const article = document.createElement('article');
+          article.className = 'rounded-2xl border border-slate-200 bg-white p-5';
+          const title = document.createElement('h2');
+          title.className = 'text-lg font-semibold';
+          title.textContent = item.title;
+          const date = document.createElement('p');
+          date.className = 'mt-1 text-xs text-slate-500';
+          date.textContent = item.date ? new Date(item.date).toLocaleDateString() : '';
+          const summary = document.createElement('p');
+          summary.className = 'mt-3 text-sm leading-6 text-slate-600';
+          summary.textContent = item.summary;
+          const link = document.createElement('a');
+          link.className = 'mt-3 inline-block text-sm font-semibold text-blue-800 hover:underline';
+          link.href = item.link;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'Read at Harvard Law Review';
+          article.append(title, date, summary, link);
+          articlesEl.append(article);
+        });
+        statusEl.textContent = `${matches.length} matching ${matches.length === 1 ? 'article' : 'articles'} from the latest Harvard Law Review feed items.`;
+      } catch (error) {
+        statusEl.textContent = 'Could not load the Harvard Law Review feed right now. Try again later or visit the topic page directly.';
+        console.error('[Media Law News] Harvard Law Review feed failed:', error);
+      }
+    }
+
+    document.getElementById('retry').addEventListener('click', loadArticles);
+    loadArticles();
+  </script>
+</body>
+</html>
