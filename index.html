@@ -162,19 +162,19 @@
         <div class="max-w-screen-2xl mx-auto px-8 py-5">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-left">
                 <div>
-                    <div id="stats-cases" class="text-3xl font-semibold tracking-tighter stat-number">0</div>
-                    <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">CASES TRACKED</div>
+                    <div id="stats-live" class="text-3xl font-semibold tracking-tighter stat-number">–</div>
+                    <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">LIVE STORIES</div>
                 </div>
                 <div>
-                    <div id="stats-new-2026" class="text-3xl font-semibold tracking-tighter stat-number">0</div>
-                    <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">NEW IN 2026</div>
+                    <div id="stats-week" class="text-3xl font-semibold tracking-tighter stat-number">–</div>
+                    <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">NEW THIS WEEK</div>
                 </div>
                 <div>
-                    <div id="stats-scotus" class="text-3xl font-semibold tracking-tighter stat-number">0</div>
-                    <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">SUPREME COURT RULINGS</div>
+                    <div id="stats-scotus" class="text-3xl font-semibold tracking-tighter stat-number">–</div>
+                    <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">SUPREME COURT STORIES</div>
                 </div>
                 <div>
-                    <div id="stats-sources" class="text-3xl font-semibold tracking-tighter">0</div>
+                    <div id="stats-sources" class="text-3xl font-semibold tracking-tighter stat-number">–</div>
                     <div class="text-xs uppercase tracking-[1.5px] text-slate-500 font-medium">ACTIVE SOURCES</div>
                 </div>
             </div>
@@ -580,25 +580,33 @@
             if (el) el.textContent = text;
         }
 
+        // Stats are computed from the live RSS items, so they change as the feeds do.
+        // Until the feeds have been checked, the stats show a dash.
+        let liveNewsItems = null;
+        const SCOTUS_PATTERN = /supreme court|scotus/i;
+        const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
         function updateStats() {
-            const caseCount = casesData.length;
-            const new2026 = casesData.filter(item => {
-                const year = new Date(item.date).getFullYear();
-                return year === 2026;
+            const setStat = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            };
+            if (!liveNewsItems) return;
+
+            const now = Date.now();
+            const newThisWeek = liveNewsItems.filter(item => {
+                const t = new Date(item.date).getTime();
+                return !Number.isNaN(t) && now - t <= WEEK_MS;
             }).length;
-            const scotusCount = casesData.filter(item => (
-                item.court && item.court.toLowerCase().includes('supreme court')
+            const scotusCount = liveNewsItems.filter(item => (
+                item.source === 'SCOTUSblog' ||
+                SCOTUS_PATTERN.test(`${item.title} ${item.summary} ${(item.tags || []).join(' ')}`)
             )).length;
 
-            const casesEl = document.getElementById('stats-cases');
-            const newEl = document.getElementById('stats-new-2026');
-            const scotusEl = document.getElementById('stats-scotus');
-            const sourcesEl = document.getElementById('stats-sources');
-
-            if (casesEl) casesEl.textContent = caseCount;
-            if (newEl) newEl.textContent = new2026;
-            if (scotusEl) scotusEl.textContent = scotusCount;
-            if (sourcesEl) sourcesEl.textContent = activeSourceCount;
+            setStat('stats-live', liveNewsItems.length);
+            setStat('stats-week', newThisWeek);
+            setStat('stats-scotus', scotusCount);
+            setStat('stats-sources', activeSourceCount);
         }
 
         function applyNews(liveItems) {
@@ -619,7 +627,8 @@
         async function loadLiveNews() {
             const cached = readFeedCache();
             if (cached) {
-                activeSourceCount = RSS_FEEDS.length;
+                activeSourceCount = new Set(cached.items.map(item => item.source)).size;
+                liveNewsItems = cached.items;
                 applyNews(cached.items);
                 updateStats();
                 setFeedStatus(`${cached.items.length} live stories · updated ${new Date(cached.savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`);
@@ -636,11 +645,13 @@
 
             if (liveItems.length === 0) {
                 activeSourceCount = 0;
+                liveNewsItems = [];
                 updateStats();
                 setFeedStatus('Live feeds unavailable right now — showing curated stories.');
                 return;
             }
 
+            liveNewsItems = liveItems;
             writeFeedCache(liveItems);
             applyNews(liveItems);
             updateStats();
