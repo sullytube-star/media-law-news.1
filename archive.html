@@ -33,7 +33,15 @@
             Latest News Feed
         </h2>
 
-        <div id="archiveNews" class="space-y-4">
+        <label for="archiveSearch" class="sr-only">Search archive articles</label>
+        <input
+            id="archiveSearch"
+            type="search"
+            placeholder="Search articles by title or content..."
+            class="w-full rounded-lg border border-slate-300 px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+
+        <div id="archiveNews" class="space-y-4" aria-live="polite">
             <p>Loading articles...</p>
         </div>
     </div>
@@ -47,50 +55,75 @@ const RSS_FEEDS = [
   "https://www.eff.org/rss/updates.xml"
 ];
 
+const archiveContainer = document.getElementById("archiveNews");
+const searchInput = document.getElementById("archiveSearch");
+let archiveArticles = [];
+
+function renderArchive() {
+  const query = searchInput.value.trim().toLowerCase();
+  const filteredArticles = archiveArticles.filter(article => {
+    const searchableText = [
+      article.title,
+      article.description,
+      article.content
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    return searchableText.includes(query);
+  });
+
+  if (filteredArticles.length === 0) {
+    archiveContainer.innerHTML = query
+      ? '<p class="text-slate-600">No articles match your search.</p>'
+      : '<p class="text-slate-600">No articles are available right now.</p>';
+    return;
+  }
+
+  archiveContainer.innerHTML = filteredArticles
+    .map(article => `
+      <div class="border-b pb-4">
+          <a href="${article.link}"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="text-blue-700 font-semibold hover:underline">
+             ${article.title}
+          </a>
+          <div class="text-sm text-slate-500 mt-1">
+              ${new Date(article.pubDate).toLocaleDateString()}
+          </div>
+      </div>
+    `)
+    .join("");
+}
+
 async function loadArchive() {
-  const container = document.getElementById("archiveNews");
-
   try {
-    let articles = [];
-
     for (const feed of RSS_FEEDS) {
       const url =
         "https://api.rss2json.com/v1/api.json?rss_url=" +
         encodeURIComponent(feed);
 
       const response = await fetch(url);
-      const data = await response.json();
+      if (!response.ok) continue;
 
+      const data = await response.json();
       if (data.items) {
-        articles.push(...data.items.slice(0, 20));
+        archiveArticles.push(...data.items.slice(0, 20));
       }
     }
 
-    articles.sort(
+    archiveArticles.sort(
       (a, b) => new Date(b.pubDate) - new Date(a.pubDate)
     );
-
-    container.innerHTML = articles
-      .map(
-        article => `
-        <div class="border-b pb-4">
-            <a href="${article.link}"
-               target="_blank"
-               class="text-blue-700 font-semibold hover:underline">
-               ${article.title}
-            </a>
-            <div class="text-sm text-slate-500 mt-1">
-                ${new Date(article.pubDate).toLocaleDateString()}
-            </div>
-        </div>
-      `
-      )
-      .join("");
+    renderArchive();
   } catch (error) {
-    container.innerHTML =
-      "<p>Unable to load archive at this time.</p>";
+    archiveContainer.innerHTML =
+      '<p class="text-slate-600">Unable to load archive at this time.</p>';
   }
 }
 
+searchInput.addEventListener("input", renderArchive);
 loadArchive();
 </script>
+
+</body>
+</html>
