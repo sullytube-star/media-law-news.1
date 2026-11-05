@@ -51,6 +51,8 @@
                     <option value="First Amendment">First Amendment</option>
                     <option value="Media Law">Media Law</option>
                     <option value="Entertainment Law">Entertainment Law</option>
+                    <option value="Defamation">Defamation</option>
+                    <option value="Privacy">Privacy</option>
                 </select>
             </div>
         </div>
@@ -69,7 +71,7 @@ const RSS_FEEDS = [
   "https://www.eff.org/rss/updates.xml"
 ];
 
-const CATEGORIES = ["First Amendment", "Media Law", "Entertainment Law"];
+const CATEGORIES = ["First Amendment", "Media Law", "Entertainment Law", "Defamation", "Privacy"];
 const archiveContainer = document.getElementById("archiveNews");
 const searchInput = document.getElementById("archiveSearch");
 const categoryFilter = document.getElementById("categoryFilter");
@@ -81,10 +83,15 @@ function getCategory(article) {
     .join(" ")
     .toLowerCase();
 
+  const defamationTerms = ["defamation", "defamatory", "libel", "slander"];
+  const privacyTerms = [
+    "privacy", "data protection", "personal data", "data breach", "surveillance",
+    "right to be forgotten", "biometric", "intrusion upon seclusion"
+  ];
   const firstAmendmentTerms = [
     "first amendment", "free speech", "freedom of speech", "freedom of the press",
-    "press freedom", "prior restraint", "public forum", "defamation", "libel",
-    "reporter", "journalist", "newsgathering", "shield law"
+    "press freedom", "prior restraint", "public forum", "reporter", "journalist",
+    "newsgathering", "shield law"
   ];
   const entertainmentTerms = [
     "entertainment", "hollywood", "film", "movie", "television", "music industry",
@@ -92,6 +99,12 @@ function getCategory(article) {
     "video game", "video games"
   ];
 
+  if (defamationTerms.some(term => text.includes(term))) {
+    return "Defamation";
+  }
+  if (privacyTerms.some(term => text.includes(term))) {
+    return "Privacy";
+  }
   if (firstAmendmentTerms.some(term => text.includes(term))) {
     return "First Amendment";
   }
