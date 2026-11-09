@@ -28,6 +28,7 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat }[] = [
   { url: 'https://deadline.com/tag/sag-aftra/feed/', source: 'Deadline SAG-AFTRA' },
   { url: 'https://deadline.com/tag/iatse/feed/', source: 'Deadline IATSE' },
   { url: 'https://completemusicupdate.com/feed/', source: 'CMU' },
+  { url: 'https://www.digitalmusicnews.com/feed/', source: 'Digital Music News' },
   { url: 'https://www.billboard.com/t/live-nation/feed/', source: 'Billboard Live Nation' },
   { url: 'https://broadwaynews.com/feed/', source: 'Broadway News' },
   { url: 'https://www.mandellpc.com/news', source: 'Mandell P.C.', format: 'mandell-html' },
