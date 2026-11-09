@@ -10,6 +10,9 @@ type FeedFormat = 'rss' | 'mandell-html'
 export const FEEDS: { url: string; source: string; format?: FeedFormat }[] = [
   { url: 'https://www.scotusblog.com/feed/', source: 'SCOTUSblog' },
   { url: 'https://firstamendmentwatch.org/feed/', source: 'First Amendment Watch' },
+  // Official RSS for nytimes.com/topic/subject/first-amendment-us-constitution
+  // (the topic page itself blocks automated requests).
+  { url: 'https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/topic/subject/first-amendment-us-constitution/rss.xml', source: 'New York Times · First Amendment' },
   { url: 'https://www.rcfp.org/feed/', source: 'Reporters Committee (RCFP)' },
   { url: 'https://www.eff.org/rss/updates.xml', source: 'EFF Deeplinks' },
   { url: 'https://deadline.com/category/legal/feed/', source: 'Deadline Legal' },
