@@ -3,9 +3,9 @@ import { XMLParser } from 'fast-xml-parser'
 
 // Every feed the site is allowed to load. The pages pick the feeds they need
 // from the cached snapshot by URL.
-// `format: 'mandell-html'` marks a site with no RSS feed whose news listing
-// page is scraped instead.
-type FeedFormat = 'rss' | 'mandell-html'
+// `format: 'mandell-html'` and `format: 'newsweek-topic'` mark sites with no
+// RSS feed whose listing page is scraped instead.
+type FeedFormat = 'rss' | 'mandell-html' | 'newsweek-topic'
 
 export const FEEDS: { url: string; source: string; format?: FeedFormat }[] = [
   { url: 'https://www.scotusblog.com/feed/', source: 'SCOTUSblog' },
@@ -13,6 +13,8 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat }[] = [
   // Official RSS for nytimes.com/topic/subject/first-amendment-us-constitution
   // (the topic page itself blocks automated requests).
   { url: 'https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/topic/subject/first-amendment-us-constitution/rss.xml', source: 'New York Times · First Amendment' },
+  // Newsweek has no RSS feed for its topic pages, so the page is scraped.
+  { url: 'https://www.newsweek.com/topic/first-amendment', source: 'Newsweek · First Amendment', format: 'newsweek-topic' },
   { url: 'https://www.rcfp.org/feed/', source: 'Reporters Committee (RCFP)' },
   { url: 'https://www.eff.org/rss/updates.xml', source: 'EFF Deeplinks' },
   { url: 'https://deadline.com/category/legal/feed/', source: 'Deadline Legal' },
@@ -188,6 +190,50 @@ function parseMandellNews(html: string, pageUrl: string): FeedItem[] {
   return finishItems(items)
 }
 
+// Newsweek topic pages (newsweek.com/topic/...) have no RSS feed. The page is a
+// Next.js app whose story list is embedded as JSON in `self.__next_f.push`
+// script chunks; each story has a link, a GMT publish date, a title, an
+// excerpt and its authors.
+const JSON_STRING = String.raw`"(?:[^"\\]|\\.)*"`
+const NEWSWEEK_POST = new RegExp(
+  String.raw`"link":"(https://www\.newsweek\.com/[^"]+)","dateGmt":"([^"]*)"[\s\S]*?"content":\{"title":(${JSON_STRING}),"headlineOverride":(null|${JSON_STRING}),"excerpt":(null|${JSON_STRING})`,
+  'g'
+)
+const NEWSWEEK_AUTHOR = new RegExp(String.raw`"authors":\[\{[^{}]*?"name":(${JSON_STRING})`)
+
+function parseNewsweekTopic(html: string): FeedItem[] {
+  let data = ''
+  for (const m of html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g)) {
+    try {
+      data += JSON.parse(m[1])
+    } catch {
+      // skip chunks that aren't plain JSON strings
+    }
+  }
+
+  const matches = [...data.matchAll(NEWSWEEK_POST)]
+  const items: FeedItem[] = []
+  const seen = new Set<string>()
+  matches.forEach((m, i) => {
+    const link = m[1]
+    if (seen.has(link)) return
+    seen.add(link)
+    const rest = data.slice(m.index, matches[i + 1]?.index ?? m.index + 5000)
+    const author = rest.match(NEWSWEEK_AUTHOR)
+    const date = m[2] ? `${m[2]}Z` : ''
+    items.push({
+      title: plainText(JSON.parse(m[4]) ?? JSON.parse(m[3])),
+      link,
+      pubDate: toIso(date),
+      author: author ? plainText(JSON.parse(author[1])) : 'Newsweek',
+      description: plainText(JSON.parse(m[5]) ?? ''),
+      categories: [],
+    })
+  })
+  if (!items.length) throw new Error('No stories found on the Newsweek topic page')
+  return finishItems(items)
+}
+
 async function fetchOne(url: string, format: FeedFormat = 'rss'): Promise<FeedItem[]> {
   const res = await fetch(url, {
     redirect: 'follow',
@@ -201,7 +247,9 @@ async function fetchOne(url: string, format: FeedFormat = 'rss'): Promise<FeedIt
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const body = await res.text()
-  return format === 'mandell-html' ? parseMandellNews(body, url) : parseFeed(body)
+  if (format === 'mandell-html') return parseMandellNews(body, url)
+  if (format === 'newsweek-topic') return parseNewsweekTopic(body)
+  return parseFeed(body)
 }
 
 function store() {
