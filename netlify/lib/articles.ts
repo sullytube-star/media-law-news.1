@@ -242,6 +242,16 @@ export async function articlesForCategory(category: ArchiveCategory, page: numbe
   return { articles: matches.slice((page - 1) * perPage, page * perPage), total: matches.length, page, totalPages, perPage }
 }
 
+// The full archive, newest first. Returns null when the page is past the end.
+export async function archivePage(page: number, perPage: number): Promise<CategoryPage | null> {
+  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(articles)
+  const total = Number(count)
+  const totalPages = Math.max(1, Math.ceil(total / perPage))
+  if (page > totalPages) return null
+  const rows = await db.select().from(articles).orderBy(desc(articles.publishedAt), desc(articles.id)).limit(perPage).offset((page - 1) * perPage)
+  return { articles: rows, total, page, totalPages, perPage }
+}
+
 export async function categoryCounts(): Promise<Record<ArchiveCategory, number>> {
   const counts = Object.fromEntries(ARCHIVE_CATEGORIES.map((c) => [c, 0])) as Record<ArchiveCategory, number>
   for (const row of await categorizedArchive()) for (const c of row.categories) counts[c]++
