@@ -11,7 +11,9 @@ type FeedFormat = 'rss' | 'mandell-html' | 'newsweek-topic'
 // so only their media, speech, privacy and entertainment stories are kept.
 const ON_TOPIC = /\b(first amendment|free speech|free press|freedom of (the )?press|press freedom|speech|censor\w*|defamation|defam\w+|libel\w*|slander|privacy|surveillance|copyright\w*|trademark\w*|right of publicity|intellectual property|entertainment|music\w*|musician|record label|film\w*|movie\w*|hollywood|studio|streaming|broadcast\w*|television|tv|netflix|disney|journalis\w+|reporters?|newspapers?|news media|media|publish\w*|social media|section 230|book ban\w*|celebrit\w+|actors?|actress|singer|rapper|artists?|sag-aftra|iatse|anti-slapp|foia|public records)\b/i
 
-export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?: boolean }[] = [
+// `linkPrefix` keeps only stories whose link starts with that URL, for
+// sections that have no feed of their own but appear in a broader one.
+export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?: boolean; linkPrefix?: string }[] = [
   { url: 'https://www.scotusblog.com/feed/', source: 'SCOTUSblog' },
   { url: 'https://firstamendmentwatch.org/feed/', source: 'First Amendment Watch' },
   // Official RSS for nytimes.com/topic/subject/first-amendment-us-constitution
@@ -47,6 +49,23 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?
   { url: 'https://verdict.news/rss', source: 'VERDICT News', onTopic: true },
   // Above the Law covers all legal industry news, so it is filtered to on-topic stories.
   { url: 'https://abovethelaw.com/feed/', source: 'Above the Law', onTopic: true },
+  // WSJ has no feed for wsj.com/us-news/law, so its official U.S. News feed is
+  // narrowed to stories published in the Law section.
+  {
+    url: 'https://feeds.content.dowjones.io/public/rss/RSSUSnews',
+    source: 'Wall Street Journal · Law',
+    linkPrefix: 'https://www.wsj.com/us-news/law/',
+  },
+  // New York Times home page feed covers all news, so it is filtered to on-topic stories.
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', source: 'New York Times', onTopic: true },
+  // Forbes has no site-wide feed (forbes.com/feed/ is blocked), so its main
+  // Business and Innovation section feeds are used, filtered to on-topic stories.
+  { url: 'https://www.forbes.com/business/feed/', source: 'Forbes', onTopic: true },
+  { url: 'https://www.forbes.com/innovation/feed/', source: 'Forbes', onTopic: true },
+  // TMZ's Legal category feed: celebrity lawsuits, trials and court filings.
+  { url: 'https://www.tmz.com/category/legal/rss.xml', source: 'TMZ Legal' },
+  // TheWrap has only a site-wide feed (no legal category feed), so it is filtered to on-topic stories.
+  { url: 'https://www.thewrap.com/feed/', source: 'TheWrap', onTopic: true },
 ]
 
 const MAX_ITEMS_PER_FEED = 25
@@ -133,7 +152,7 @@ function atomLink(links: unknown): string {
   return typeof pick === 'object' ? String(pick['@_href'] ?? '') : String(pick ?? '')
 }
 
-function parseFeed(xml: string): FeedItem[] {
+function parseFeed(xml: string, linkPrefix?: string): FeedItem[] {
   const doc = parser.parse(xml)
   const rssItems = doc?.rss?.channel?.item ?? doc?.['rdf:RDF']?.item
   const atomEntries = doc?.feed?.entry
@@ -165,6 +184,8 @@ function parseFeed(xml: string): FeedItem[] {
     throw new Error('Response is not an RSS or Atom feed')
   }
 
+  // Narrow to one section before the per-feed item cap is applied.
+  if (linkPrefix) items = items.filter((item) => item.link.startsWith(linkPrefix))
   return finishItems(items)
 }
 
@@ -250,7 +271,7 @@ function parseNewsweekTopic(html: string): FeedItem[] {
   return finishItems(items)
 }
 
-async function fetchOne(url: string, format: FeedFormat = 'rss'): Promise<FeedItem[]> {
+async function fetchOne(url: string, format: FeedFormat = 'rss', linkPrefix?: string): Promise<FeedItem[]> {
   const res = await fetch(url, {
     redirect: 'follow',
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
@@ -265,7 +286,7 @@ async function fetchOne(url: string, format: FeedFormat = 'rss'): Promise<FeedIt
   const body = await res.text()
   if (format === 'mandell-html') return parseMandellNews(body, url)
   if (format === 'newsweek-topic') return parseNewsweekTopic(body)
-  return parseFeed(body)
+  return parseFeed(body, linkPrefix)
 }
 
 function store() {
@@ -284,9 +305,9 @@ export async function refreshFeeds(): Promise<Snapshot> {
   const now = new Date().toISOString()
 
   const feeds = await Promise.all(
-    FEEDS.map(async ({ url, source, format, onTopic }): Promise<FeedResult> => {
+    FEEDS.map(async ({ url, source, format, onTopic, linkPrefix }): Promise<FeedResult> => {
       try {
-        let items = await fetchOne(url, format)
+        let items = await fetchOne(url, format, linkPrefix)
         if (onTopic) items = items.filter((i) => ON_TOPIC.test(`${i.title} ${i.description.slice(0, 600)} ${i.categories.join(' ')}`))
         return { url, source, status: 'ok', fetchedAt: now, checkedAt: now, items }
       } catch (error) {

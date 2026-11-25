@@ -460,9 +460,15 @@
             { url: 'https://www.courthousenews.com/category/civil-rights/feed/', source: 'Courthouse News · Civil Rights', category: 'first-amendment' },
             { url: 'https://www.courthousenews.com/category/appeals/feed/', source: 'Courthouse News · Appeals', category: 'media-law' },
             { url: 'https://verdict.news/rss', source: 'VERDICT News', category: 'media-law' },
-            { url: 'https://abovethelaw.com/feed/', source: 'Above the Law', category: 'media-law' }
+            { url: 'https://abovethelaw.com/feed/', source: 'Above the Law', category: 'media-law' },
+            { url: 'https://feeds.content.dowjones.io/public/rss/RSSUSnews', source: 'Wall Street Journal · Law', category: 'media-law' },
+            { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', source: 'New York Times', category: 'media-law' },
+            { url: 'https://www.forbes.com/business/feed/', source: 'Forbes', category: 'media-law' },
+            { url: 'https://www.forbes.com/innovation/feed/', source: 'Forbes', category: 'media-law' },
+            { url: 'https://www.tmz.com/category/legal/rss.xml', source: 'TMZ Legal', category: 'entertainment' },
+            { url: 'https://www.thewrap.com/feed/', source: 'TheWrap', category: 'entertainment' }
         ];
-        const FEED_CACHE_KEY = 'media-law-news-live-v12';
+        const FEED_CACHE_KEY = 'media-law-news-live-v14';
         const FEED_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
         const CATEGORY_LABELS = {
@@ -727,15 +733,17 @@
             }
             const byUrl = new Map(snapshotFeeds.map(f => [f.url, f]));
             let liveItems = [];
-            activeSourceCount = 0;
+            // Some publishers (e.g. Forbes) span several feeds; count each name once.
+            const activeSources = new Set();
             RSS_FEEDS.forEach(feed => {
                 const result = byUrl.get(feed.url);
                 if (result && result.status !== 'ok') console.warn(`[Media Law News] Feed failed: ${feed.source}`, result.message);
                 if (result && result.items && result.items.length) {
-                    activeSourceCount++;
+                    activeSources.add(feed.source);
                     liveItems = liveItems.concat(feedItemsToNews(feed, result.items));
                 }
             });
+            activeSourceCount = activeSources.size;
 
             if (liveItems.length === 0) {
                 activeSourceCount = 0;
