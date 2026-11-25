@@ -1,0 +1,9 @@
+[build]
+  # Renders article, category and archive pages and builds the Pagefind search index into ./pagefind/
+  command = "npm run build"
+  publish = "."
+
+[[headers]]
+  for = "/pagefind/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"

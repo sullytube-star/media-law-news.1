@@ -1,8 +1,8 @@
 import type { Config, Context } from '@netlify/functions'
-import { articlesForCategory, categoryCounts, ARCHIVE_CATEGORIES, type ArchiveCategory } from '../lib/articles.ts'
+import { articlesForCategory, CATEGORY_PER_PAGE, categoryCounts, ARCHIVE_CATEGORIES, type ArchiveCategory } from '../lib/articles.ts'
 import { categoryPath, renderCategoryIndex, renderCategoryPage, renderNotFoundPage } from '../lib/article-page.ts'
 
-const PER_PAGE = 20
+const PER_PAGE = CATEGORY_PER_PAGE
 const HTML_HEADERS = {
   'Content-Type': 'text/html; charset=utf-8',
   'Cache-Control': 'public, max-age=60',

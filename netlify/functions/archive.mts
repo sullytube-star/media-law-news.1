@@ -1,8 +1,8 @@
 import type { Config } from '@netlify/functions'
-import { archivePage } from '../lib/articles.ts'
+import { archivePage, ARCHIVE_PER_PAGE } from '../lib/articles.ts'
 import { archivePath, renderArchivePage, renderNotFoundPage } from '../lib/article-page.ts'
 
-const PER_PAGE = 25
+const PER_PAGE = ARCHIVE_PER_PAGE
 const HTML_HEADERS = {
   'Content-Type': 'text/html; charset=utf-8',
   'Cache-Control': 'public, max-age=60',
