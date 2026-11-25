@@ -45,6 +45,8 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?
   { url: 'https://www.courthousenews.com/category/appeals/feed/', source: 'Courthouse News · Appeals' },
   // VERDICT News covers all legal news, so it is filtered to on-topic stories.
   { url: 'https://verdict.news/rss', source: 'VERDICT News', onTopic: true },
+  // Above the Law covers all legal industry news, so it is filtered to on-topic stories.
+  { url: 'https://abovethelaw.com/feed/', source: 'Above the Law', onTopic: true },
 ]
 
 const MAX_ITEMS_PER_FEED = 25
