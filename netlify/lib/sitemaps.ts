@@ -1,4 +1,4 @@
-import { asc, sql } from 'drizzle-orm'
+import { and, asc, desc, gte, lte, sql } from 'drizzle-orm'
 import { db } from '../../db/index.js'
 import { articles } from '../../db/schema.js'
 import { articlePath, categoryStats, ARCHIVE_CATEGORIES, ARCHIVE_PER_PAGE, CATEGORY_PER_PAGE } from './articles.ts'
@@ -50,6 +50,7 @@ export async function renderSitemapIndex(): Promise<string> {
   }
   for (let i = 1; i <= count; i++) children.push({ loc: articleSitemapPath(i), lastmod: latestPerFile.get(i - 1) ?? null })
   children.push({ loc: '/category-sitemap.xml', lastmod: latest }, { loc: '/archive-sitemap.xml', lastmod: latest })
+  children.push({ loc: '/news-sitemap.xml', lastmod: latest })
   return sitemapIndex(children)
 }
 
@@ -84,4 +85,32 @@ export async function renderArchiveSitemap(): Promise<string> {
   const { total, latest } = await articleTotals()
   const pages = Math.max(1, Math.ceil(total / ARCHIVE_PER_PAGE))
   return urlset(Array.from({ length: pages }, (_, i) => ({ loc: archivePath(i + 1), lastmod: latest })))
+}
+
+// Google News sitemap: only articles published in the last 48 hours, at most 1,000 entries.
+// The window is computed on every request, so older articles drop out automatically.
+export const NEWS_WINDOW_MS = 48 * 60 * 60 * 1000
+export const NEWS_MAX_URLS = 1000
+const PUBLICATION_NAME = 'Media Law News'
+const PUBLICATION_LANGUAGE = 'en'
+
+export async function renderNewsSitemap(now = new Date()): Promise<string> {
+  const since = new Date(now.getTime() - NEWS_WINDOW_MS)
+  const rows = await db.select({ year: articles.year, slug: articles.slug, title: articles.title, publishedAt: articles.publishedAt })
+    .from(articles)
+    // Future-dated items are left out until their publication time arrives.
+    .where(and(gte(articles.publishedAt, since), lte(articles.publishedAt, now)))
+    .orderBy(desc(articles.publishedAt), desc(articles.id))
+    .limit(NEWS_MAX_URLS)
+  const urls = rows.map((a) => [
+    '<url>',
+    `<loc>${escapeXml(SITE + articlePath(a))}</loc>`,
+    '<news:news>',
+    `<news:publication><news:name>${escapeXml(PUBLICATION_NAME)}</news:name><news:language>${PUBLICATION_LANGUAGE}</news:language></news:publication>`,
+    `<news:publication_date>${a.publishedAt.toISOString()}</news:publication_date>`,
+    `<news:title>${escapeXml(a.title)}</news:title>`,
+    '</news:news>',
+    '</url>',
+  ].join('')).join('\n')
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">\n${urls}${urls ? '\n' : ''}</urlset>\n`
 }
