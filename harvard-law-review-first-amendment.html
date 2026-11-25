@@ -98,6 +98,7 @@
           link.target = '_blank';
           link.rel = 'noopener noreferrer';
           link.textContent = 'Read at Harvard Law Review';
+          link.setAttribute('aria-label', `Read at Harvard Law Review: ${item.title} (opens in a new tab)`);
           article.append(title, date, summary, link);
           articlesEl.append(article);
         });
