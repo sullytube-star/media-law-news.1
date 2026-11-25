@@ -48,6 +48,12 @@ const FEED_TOPICS: Record<string, Topic> = {
   'https://www.courthousenews.com/category/appeals/feed/': 'media-law',
   'https://verdict.news/rss': 'media-law',
   'https://abovethelaw.com/feed/': 'media-law',
+  'https://feeds.content.dowjones.io/public/rss/RSSUSnews': 'media-law',
+  'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml': 'media-law',
+  'https://www.forbes.com/business/feed/': 'media-law',
+  'https://www.forbes.com/innovation/feed/': 'media-law',
+  'https://www.tmz.com/category/legal/rss.xml': 'entertainment',
+  'https://www.thewrap.com/feed/': 'entertainment',
   'https://www.billboard.com/c/business/legal/feed/': 'entertainment',
 }
 
