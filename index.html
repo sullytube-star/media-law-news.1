@@ -420,7 +420,7 @@
             { url: 'https://www.billboard.com/t/live-nation/feed/', source: 'Billboard Live Nation', category: 'entertainment' },
             { url: 'https://broadwaynews.com/feed/', source: 'Broadway News', category: 'entertainment' }
         ];
-        const FEED_CACHE_KEY = 'media-law-news-live-v7';
+        const FEED_CACHE_KEY = 'media-law-news-live-v8';
         const FEED_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
         const CATEGORY_LABELS = {
@@ -525,6 +525,23 @@
 
         let newsData = [...curatedNews];
 
+        // Permanent article pages (/articles/YYYY/slug.html) for the curated
+        // stories, keyed by original link. Filled in from /api/feeds.
+        const CURATED_PERMALINK_KEY = 'media-law-news-curated-permalinks-v1';
+        let curatedPermalinks = {};
+        try { curatedPermalinks = JSON.parse(localStorage.getItem(CURATED_PERMALINK_KEY)) || {}; } catch {}
+
+        function setCuratedPermalinks(list) {
+            (list || []).forEach(entry => { if (entry.permalink) curatedPermalinks[entry.link] = entry.permalink; });
+            try { localStorage.setItem(CURATED_PERMALINK_KEY, JSON.stringify(curatedPermalinks)); } catch {}
+        }
+
+        // Only same-site /articles/ paths are used as permalinks.
+        function articleUrl(item) {
+            const path = item.permalink || curatedPermalinks[item.link];
+            return typeof path === 'string' && /^\/articles\/\d{4}\/[a-z0-9-]+\.html$/.test(path) ? path : null;
+        }
+
         function escapeHTML(value) {
             return String(value ?? '')
                 .replace(/&/g, '&amp;')
@@ -575,6 +592,7 @@
                     summary,
                     source: feed.source,
                     link: item.link,
+                    permalink: item.permalink || null,
                     tags: (item.categories || []).slice(0, 5).map(stripHTML).filter(Boolean),
                     live: true
                 };
@@ -659,7 +677,9 @@
             try {
                 const res = await fetch(FEEDS_ENDPOINT);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                snapshotFeeds = (await res.json()).feeds || [];
+                const data = await res.json();
+                snapshotFeeds = data.feeds || [];
+                setCuratedPermalinks(data.curated);
             } catch (error) {
                 console.warn('[Media Law News] Could not load feeds', error);
             }
@@ -678,6 +698,7 @@
             if (liveItems.length === 0) {
                 activeSourceCount = 0;
                 liveNewsItems = [];
+                filterNews(currentNewsFilter);
                 updateStats();
                 setFeedStatus('Live feeds unavailable right now — showing curated stories.');
                 return;
@@ -804,6 +825,7 @@
             container.innerHTML = '';
 
             filteredNews.forEach(item => {
+                const permalink = articleUrl(item);
                 const card = document.createElement('div');
                 card.className = `legal-card bg-white border border-slate-200 rounded-3xl p-6 flex flex-col h-full`;
                 card.innerHTML = `
@@ -812,18 +834,25 @@
                         <span class="text-xs text-slate-500 font-mono">${item.live ? '<span class="text-red-600 font-semibold mr-1">● LIVE</span>' : ''}${formatDate(item.date)}</span>
                     </div>
                     
-                    <h3 class="font-semibold text-[15.5px] leading-tight tracking-tight mb-3 line-clamp-3">${escapeHTML(item.title)}</h3>
+                    <h3 class="font-semibold text-[15.5px] leading-tight tracking-tight mb-3 line-clamp-3">${permalink
+                        ? `<a href="${escapeHTML(permalink)}" class="hover:text-blue-800">${escapeHTML(item.title)}</a>`
+                        : escapeHTML(item.title)}</h3>
                     
                     <p class="text-sm text-slate-600 line-clamp-3 flex-grow">${escapeHTML(item.summary)}</p>
                     
                     <div class="mt-5 pt-4 border-t flex items-center justify-between text-xs">
                         <div class="text-slate-500">${escapeHTML(item.source)}</div>
                         <div class="flex items-center gap-x-1">
-                            <button onclick="showNewsModal(${item.id}); event.stopImmediatePropagation();" 
+                            ${permalink
+                                ? `<a href="${escapeHTML(permalink)}" class="font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-x-1">
+                                    <span>Read article</span>
+                                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                </a>`
+                                : `<button onclick="showNewsModal(${item.id}); event.stopImmediatePropagation();" 
                                     class="font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-x-1">
-                                <span>Details</span> 
-                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </button>
+                                    <span>Details</span> 
+                                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                </button>`}
                             <a href="${escapeHTML(safeUrl(item.link))}" target="_blank" rel="noopener noreferrer" onclick="event.stopImmediatePropagation();" 
                                class="ml-2 text-blue-700 hover:text-blue-800">
                                 <i class="fa-solid fa-external-link-alt"></i>
