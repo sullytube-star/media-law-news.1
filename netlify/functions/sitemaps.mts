@@ -1,5 +1,5 @@
 import type { Config } from '@netlify/functions'
-import { renderArchiveSitemap, renderArticleSitemap, renderCategorySitemap, renderPageSitemap, renderSitemapIndex } from '../lib/sitemaps.ts'
+import { renderArchiveSitemap, renderArticleSitemap, renderCategorySitemap, renderNewsSitemap, renderPageSitemap, renderSitemapIndex } from '../lib/sitemaps.ts'
 
 const XML_HEADERS = {
   'Content-Type': 'application/xml; charset=utf-8',
@@ -7,11 +7,18 @@ const XML_HEADERS = {
   'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=900, stale-while-revalidate=3600',
 }
 
+// The news sitemap rolls forward continuously, so it gets a shorter CDN cache than the other sitemaps.
+const NEWS_HEADERS = {
+  ...XML_HEADERS,
+  'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=300, stale-while-revalidate=600',
+}
+
 const notFound = () => new Response('Not found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
 
 export default async (request: Request) => {
   const { pathname } = new URL(request.url)
   let xml: string | null = null
+  if (pathname === '/news-sitemap.xml') return new Response(await renderNewsSitemap(), { headers: NEWS_HEADERS })
   if (pathname === '/sitemap.xml') xml = await renderSitemapIndex()
   else if (pathname === '/page-sitemap.xml') xml = await renderPageSitemap()
   else if (pathname === '/category-sitemap.xml') xml = await renderCategorySitemap()
@@ -25,6 +32,6 @@ export default async (request: Request) => {
 }
 
 export const config: Config = {
-  path: ['/sitemap.xml', '/page-sitemap.xml', '/category-sitemap.xml', '/archive-sitemap.xml', '/article-sitemap-*'],
+  path: ['/sitemap.xml', '/news-sitemap.xml', '/page-sitemap.xml', '/category-sitemap.xml', '/archive-sitemap.xml', '/article-sitemap-*'],
   method: 'GET',
 }

@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://medialawnews.com/sitemap.xml
+Sitemap: https://medialawnews.com/news-sitemap.xml
