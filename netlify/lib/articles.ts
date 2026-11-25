@@ -46,6 +46,8 @@ const FEED_TOPICS: Record<string, Topic> = {
   'https://www.courthousenews.com/category/entertainment/feed/': 'entertainment',
   'https://www.courthousenews.com/category/civil-rights/feed/': 'first-amendment',
   'https://www.courthousenews.com/category/appeals/feed/': 'media-law',
+  'https://verdict.news/rss': 'media-law',
+  'https://www.billboard.com/c/business/legal/feed/': 'entertainment',
 }
 
 export function classifyTopic(text: string, fallback: Topic): Topic {

@@ -43,6 +43,8 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?
   { url: 'https://www.courthousenews.com/category/entertainment/feed/', source: 'Courthouse News · Entertainment' },
   { url: 'https://www.courthousenews.com/category/civil-rights/feed/', source: 'Courthouse News · Civil Rights' },
   { url: 'https://www.courthousenews.com/category/appeals/feed/', source: 'Courthouse News · Appeals' },
+  // VERDICT News covers all legal news, so it is filtered to on-topic stories.
+  { url: 'https://verdict.news/rss', source: 'VERDICT News', onTopic: true },
 ]
 
 const MAX_ITEMS_PER_FEED = 25
