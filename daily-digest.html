@@ -165,6 +165,7 @@
                     link.rel = 'noopener noreferrer';
                     link.className = 'mt-4 inline-block text-sm font-semibold text-blue-800 hover:underline';
                     link.textContent = 'Read source';
+                    link.setAttribute('aria-label', `Read source: ${item.title} (opens in a new tab)`);
                     article.appendChild(link);
                 }
 

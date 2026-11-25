@@ -74,7 +74,7 @@ body { font-family: 'Inter', system-ui, sans-serif; }
 <header class="bg-white border-b border-slate-200">
   <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
     <a href="/" class="flex items-center gap-x-3">
-      <span class="w-9 h-9 bg-blue-900 text-white rounded-2xl flex items-center justify-center"><i class="fa-solid fa-scale-balanced"></i></span>
+      <span class="w-9 h-9 bg-blue-900 text-white rounded-2xl flex items-center justify-center" aria-hidden="true"><i class="fa-solid fa-scale-balanced"></i></span>
       <span class="heading-serif text-xl text-blue-950">Media Law News</span>
     </a>
     <nav class="flex items-center gap-x-4 sm:gap-x-5 text-sm font-medium text-slate-600"><a href="/archive/" class="hover:text-blue-800">Archive</a><a href="/category/" class="hover:text-blue-800">Categories</a><a href="/#news" class="hidden sm:inline hover:text-blue-800">Latest news</a>
@@ -219,8 +219,8 @@ ${crumbs.jsonLd}`
 
     <div class="mt-10 pt-6 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <p class="text-sm text-slate-500">Originally reported by ${escape(article.source)}.</p>
-      <a href="${escape(original)}" target="_blank" rel="noopener" data-pagefind-ignore class="inline-flex items-center justify-center gap-x-2 bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold rounded-3xl px-6 py-3">
-        Read the full story at ${escape(article.source)} <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+      <a href="${escape(original)}" target="_blank" rel="noopener" aria-label="Read the full story at ${escape(article.source)}: ${escape(article.title)} (opens in a new tab)" data-pagefind-ignore class="inline-flex items-center justify-center gap-x-2 bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold rounded-3xl px-6 py-3">
+        Read the full story at ${escape(article.source)} <i class="fa-solid fa-arrow-up-right-from-square text-xs" aria-hidden="true"></i>
       </a>
     </div>
   </article>

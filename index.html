@@ -137,7 +137,7 @@
                     <!-- Mobile site search -->
                     <button type="button" data-site-search aria-label="Search Media Law News"
                             class="md:hidden w-10 h-10 flex items-center justify-center text-slate-600 hover:text-slate-900">
-                        <i class="fa-solid fa-magnifying-glass text-xl"></i>
+                        <i class="fa-solid fa-magnifying-glass text-xl" aria-hidden="true"></i>
                     </button>
                     
                     <button onclick="showSubscribeModal()"
@@ -147,8 +147,8 @@
                     </button>
                     
                     <!-- Mobile menu -->
-                    <button class="md:hidden w-10 h-10 flex items-center justify-center text-slate-600 hover:text-slate-900" onclick="toggleMobileMenu()">
-                        <i class="fa-solid fa-bars text-xl"></i>
+                    <button type="button" aria-label="Open menu" class="md:hidden w-10 h-10 flex items-center justify-center text-slate-600 hover:text-slate-900" onclick="toggleMobileMenu()">
+                        <i class="fa-solid fa-bars text-xl" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
@@ -245,12 +245,12 @@
     <a href="/archive/"
        class="text-sm font-semibold px-6 py-3 border border-slate-300 hover:bg-white rounded-3xl inline-flex items-center gap-x-2">
         <span>View Full News Archive</span>
-        <i class="fa-solid fa-external-link-alt text-xs"></i>
+        <i class="fa-solid fa-external-link-alt text-xs" aria-hidden="true"></i>
     </a>
     <a href="google-news.html"
        class="ml-2 text-sm font-semibold px-6 py-3 border border-slate-300 hover:bg-white rounded-3xl inline-flex items-center gap-x-2">
         <span>Today's Top 100 from Google News</span>
-        <i class="fa-brands fa-google text-xs"></i>
+        <i class="fa-brands fa-google text-xs" aria-hidden="true"></i>
     </a>
 </div>
 
@@ -284,36 +284,36 @@
             <p class="text-slate-600 mb-8">Media Law News aggregates from these trusted organizations and official court records.</p>
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <a href="https://medialaw.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-newspaper text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                <a href="https://medialaw.org/" target="_blank" rel="noopener noreferrer" aria-label="Media Law Resource Center – MLRC, MediaLawDaily (opens in a new tab)" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-newspaper text-2xl text-blue-800 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
                     <div>
                         <div class="font-semibold">Media Law Resource Center</div>
                         <div class="text-xs text-slate-500">MLRC • MediaLawDaily</div>
                     </div>
                 </a>
-                <a href="https://rcfp.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-gavel text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                <a href="https://rcfp.org/" target="_blank" rel="noopener noreferrer" aria-label="Reporters Committee – RCFP First Amendment Handbook (opens in a new tab)" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-gavel text-2xl text-blue-800 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
                     <div>
                         <div class="font-semibold">Reporters Committee</div>
                         <div class="text-xs text-slate-500">RCFP • First Amendment Handbook</div>
                     </div>
                 </a>
-                <a href="https://www.law360.com/media" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-tv text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                <a href="https://www.law360.com/media" target="_blank" rel="noopener noreferrer" aria-label="Law360 Media &amp; Entertainment – premium legal news (opens in a new tab)" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-tv text-2xl text-blue-800 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
                     <div>
                         <div class="font-semibold">Law360 Media &amp; Entertainment</div>
                         <div class="text-xs text-slate-500">Premium legal news</div>
                     </div>
                 </a>
-                <a href="https://knightcolumbia.org/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-globe text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                <a href="https://knightcolumbia.org/" target="_blank" rel="noopener noreferrer" aria-label="Knight First Amendment Institute – Columbia University (opens in a new tab)" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-globe text-2xl text-blue-800 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
                     <div>
                         <div class="font-semibold">Knight First Amendment Institute</div>
                         <div class="text-xs text-slate-500">Columbia University</div>
                     </div>
                 </a>
-                <a href="https://www.supremecourt.gov/" target="_blank" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
-                    <i class="fa-solid fa-landmark text-2xl text-blue-800 group-hover:scale-110 transition-transform"></i>
+                <a href="https://www.supremecourt.gov/" target="_blank" rel="noopener noreferrer" aria-label="U.S. Supreme Court – official opinions (opens in a new tab)" class="group flex items-center gap-x-3 p-4 bg-white rounded-3xl border hover:border-blue-200 transition-colors">
+                    <i class="fa-solid fa-landmark text-2xl text-blue-800 group-hover:scale-110 transition-transform" aria-hidden="true"></i>
                     <div>
                         <div class="font-semibold">U.S. Supreme Court</div>
                         <div class="text-xs text-slate-500">Official Opinions</div>
@@ -351,7 +351,7 @@
                     <h3 id="modal-title" class="text-3xl font-bold tracking-tight pr-8"></h3>
                     <div id="modal-citation" class="text-slate-500 mt-1 font-mono text-sm"></div>
                 </div>
-                <button onclick="hideCaseModal()" class="text-3xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+                <button type="button" aria-label="Close case details" onclick="hideCaseModal()" class="text-3xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
             </div>
             
             <div class="p-8 overflow-auto max-h-[55vh]">
@@ -376,10 +376,10 @@
                     <span id="modal-court" class="text-slate-600"></span>
                 </div>
                 <div>
-                    <a id="modal-link" href="#" target="_blank" 
+                    <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" aria-label="Read full opinion (opens in a new tab)"
                        class="inline-flex items-center gap-x-2 text-sm font-semibold px-5 py-2.5 bg-blue-900 hover:bg-blue-800 text-white rounded-3xl">
                         <span>Read Full Opinion</span>
-                        <i class="fa-solid fa-external-link-alt text-xs"></i>
+                        <i class="fa-solid fa-external-link-alt text-xs" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
@@ -394,7 +394,7 @@
                     <h4 class="font-bold text-2xl">Stay Informed</h4>
                     <p class="text-slate-600">Weekly curated digest of media &amp; First Amendment cases</p>
                 </div>
-                <button onclick="hideSubscribeModal()" class="text-3xl leading-none">&times;</button>
+                <button type="button" aria-label="Close subscribe dialog" onclick="hideSubscribeModal()" class="text-3xl leading-none">&times;</button>
             </div>
             
             <form onsubmit="subscribeUser(event)" class="space-y-4 mt-6">
@@ -885,18 +885,19 @@
                         <div class="text-slate-500">${escapeHTML(item.source)}</div>
                         <div class="flex items-center gap-x-1">
                             ${permalink
-                                ? `<a href="${escapeHTML(permalink)}" class="font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-x-1">
+                                ? `<a href="${escapeHTML(permalink)}" aria-label="Read article: ${escapeHTML(item.title)}" class="font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-x-1">
                                     <span>Read article</span>
-                                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                    <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
                                 </a>`
-                                : `<button onclick="showNewsModal(${item.id}); event.stopImmediatePropagation();" 
+                                : `<button type="button" onclick="showNewsModal(${item.id}); event.stopImmediatePropagation();" aria-label="Details: ${escapeHTML(item.title)}"
                                     class="font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-x-1">
                                     <span>Details</span> 
-                                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                    <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
                                 </button>`}
                             <a href="${escapeHTML(safeUrl(item.link))}" target="_blank" rel="noopener noreferrer" onclick="event.stopImmediatePropagation();" 
+                               aria-label="Read full article: ${escapeHTML(item.title)} (${escapeHTML(item.source)}, opens in a new tab)" title="Read original at ${escapeHTML(item.source)}"
                                class="ml-2 text-blue-700 hover:text-blue-800">
-                                <i class="fa-solid fa-external-link-alt"></i>
+                                <i class="fa-solid fa-external-link-alt" aria-hidden="true"></i>
                             </a>
                         </div>
                     </div>
@@ -960,6 +961,10 @@
                 const card = document.createElement('div');
                 card.className = `legal-card bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 cursor-pointer flex flex-col`;
                 card.onclick = () => showCaseModal(item.id);
+                card.setAttribute('role', 'button');
+                card.tabIndex = 0;
+                card.setAttribute('aria-label', `View full case: ${item.title}`);
+                card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showCaseModal(item.id); } };
                 const holding = item.holding.length > 165 ? item.holding.substring(0, 165) + '...' : item.holding;
 
                 card.innerHTML = `
@@ -975,7 +980,7 @@
                     
                     <div class="mt-auto pt-4 flex items-center justify-between text-xs text-blue-700 font-medium">
                         <span>View full case</span>
-                        <i class="fa-solid fa-arrow-right"></i>
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                     </div>
                 `;
                 container.appendChild(card);
@@ -1031,6 +1036,7 @@
             document.getElementById('modal-date').textContent = item.date;
             document.getElementById('modal-court').textContent = item.court;
             document.getElementById('modal-link').href = safeUrl(item.link);
+            document.getElementById('modal-link').setAttribute('aria-label', `Read full opinion (opens in a new tab): ${item.title}`);
 
             const issuesContainer = document.getElementById('modal-issues');
             issuesContainer.innerHTML = '';
@@ -1077,8 +1083,8 @@
                         
                         <div class="px-8 py-5 bg-slate-50 border-t flex items-center justify-between text-sm">
                             <div class="text-slate-600">Source: <span class="font-medium">${escapeHTML(item.source)}</span></div>
-                            <a href="${escapeHTML(safeUrl(item.link))}" target="_blank" rel="noopener noreferrer" class="font-semibold flex items-center gap-x-2 text-blue-700">
-                                Read full coverage <i class="fa-solid fa-external-link-alt ml-1"></i>
+                            <a href="${escapeHTML(safeUrl(item.link))}" target="_blank" rel="noopener noreferrer" aria-label="Read full coverage at ${escapeHTML(item.source)} (opens in a new tab): ${escapeHTML(item.title)}" class="font-semibold flex items-center gap-x-2 text-blue-700">
+                                Read full coverage <i class="fa-solid fa-external-link-alt ml-1" aria-hidden="true"></i>
                             </a>
                         </div>
                     </div>
