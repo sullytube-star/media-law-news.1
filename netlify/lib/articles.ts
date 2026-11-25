@@ -284,3 +284,15 @@ export async function legacySourceUrl(year: string, slug: string): Promise<strin
     return legacy?.find((a) => a.year === year && a.slug === slug)?.originalUrl
   } catch { return undefined }
 }
+
+// Article count and newest publication date per archive category (used by the sitemaps).
+export async function categoryStats(): Promise<Record<ArchiveCategory, { count: number; latest: Date | null }>> {
+  const stats = Object.fromEntries(ARCHIVE_CATEGORIES.map((c) => [c, { count: 0, latest: null }])) as Record<ArchiveCategory, { count: number; latest: Date | null }>
+  for (const { article, categories } of await categorizedArchive()) {
+    for (const c of categories) {
+      stats[c].count++
+      if (!stats[c].latest || article.publishedAt > stats[c].latest!) stats[c].latest = article.publishedAt
+    }
+  }
+  return stats
+}
