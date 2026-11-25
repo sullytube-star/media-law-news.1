@@ -57,6 +57,9 @@ function shell(title: string, head: string, body: string): string {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escape(title)}</title>
 ${head}
+${head.includes('twitter:card') ? '' : '<meta name="twitter:card" content="summary">'}
+<meta name="theme-color" content="#1e3a8a">
+<link rel="icon" type="image/png" href="/images/schema/logo-512.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="/search.js" defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -317,6 +320,11 @@ export function renderCategoryIndex(counts: Record<ArchiveCategory, number>): st
   const crumbs = breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Categories' }])
   const head = `<meta name="description" content="Browse Media Law News coverage by category: media law, First Amendment, entertainment law, privacy, defamation, journalism, technology law and the Supreme Court.">
 <link rel="canonical" href="${SITE}/category/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Media Law News">
+<meta property="og:title" content="Categories | Media Law News">
+<meta property="og:description" content="Browse Media Law News coverage by category: media law, First Amendment, entertainment law, privacy, defamation, journalism, technology law and the Supreme Court.">
+<meta property="og:url" content="${SITE}/category/">
 ${crumbs.jsonLd}`
   const cards = ARCHIVE_CATEGORIES.map((c) => `<li><a href="${categoryPath(c)}" class="group block h-full bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 transition">
       <div class="flex items-baseline justify-between gap-3"><h2 class="text-lg font-semibold group-hover:text-blue-800">${escape(CATEGORY_LABELS[c])}</h2><span class="text-xs font-mono text-slate-500" data-pagefind-ignore>${counts[c]} ${counts[c] === 1 ? 'article' : 'articles'}</span></div>
