@@ -1,4 +1,4 @@
-import { articlePath, TOPIC_LABELS, type Article, type Topic } from './articles.ts'
+import { articlePath, archiveCategories, primaryCategory, ARCHIVE_CATEGORIES, CATEGORY_DESCRIPTIONS, CATEGORY_LABELS, TOPIC_LABELS, type ArchiveCategory, type Article, type CategoryPage, type Topic } from './articles.ts'
 
 const SITE = 'https://medialawnews.com'
 
@@ -19,6 +19,10 @@ function longDate(date: Date): string {
 
 function shortDate(date: Date): string {
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })
+}
+
+function truncate(text: string, max: number): string {
+  return text.length > max ? text.slice(0, max - 3).replace(/\s+\S*$/, '') + '…' : text
 }
 
 function safeHttpUrl(url: string): string {
@@ -54,7 +58,7 @@ body { font-family: 'Inter', system-ui, sans-serif; }
       <span class="w-9 h-9 bg-blue-900 text-white rounded-2xl flex items-center justify-center"><i class="fa-solid fa-scale-balanced"></i></span>
       <span class="heading-serif text-xl text-blue-950">Media Law News</span>
     </a>
-    <a href="/#news" class="text-sm font-medium text-slate-600 hover:text-blue-800">Latest news</a>
+    <nav class="flex items-center gap-x-5 text-sm font-medium text-slate-600"><a href="/category/" class="hover:text-blue-800">Categories</a><a href="/#news" class="hover:text-blue-800">Latest news</a></nav>
   </div>
 </header>
 ${body}
@@ -65,6 +69,36 @@ ${body}
 </html>`
 }
 
+type Crumb = { name: string; path?: string }
+
+// Visible breadcrumb trail plus matching schema.org BreadcrumbList markup.
+function breadcrumbs(crumbs: Crumb[]): { html: string; jsonLd: string } {
+  const items = crumbs.map((c, i) => {
+    const last = i === crumbs.length - 1
+    const label = escape(c.name)
+    return last || !c.path
+      ? `<li class="truncate max-w-[16rem] md:max-w-md text-slate-700" ${last ? 'aria-current="page"' : ''}>${label}</li>`
+      : `<li><a href="${escape(c.path)}" class="hover:text-blue-800">${label}</a></li><li aria-hidden="true" class="text-slate-300">/</li>`
+  }).join('')
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, ...(c.path ? { item: `${SITE}${c.path}` } : {}) })),
+  }
+  return {
+    html: `<nav class="text-xs text-slate-500 mb-6" aria-label="Breadcrumb"><ol class="flex flex-wrap items-center gap-x-2 gap-y-1">${items}</ol></nav>`,
+    jsonLd: `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`,
+  }
+}
+
+export function categoryPath(category: ArchiveCategory, page = 1): string {
+  return page > 1 ? `/category/${category}/page/${page}/` : `/category/${category}/`
+}
+
+function categoryChips(categories: ArchiveCategory[], current?: ArchiveCategory): string {
+  return categories.map((c) => `<a href="${categoryPath(c)}" ${c === current ? 'aria-current="page"' : ''} class="text-xs font-semibold rounded-full px-3 py-1 transition ${c === current ? 'bg-blue-900 text-white' : 'bg-blue-50 text-blue-800 hover:bg-blue-100'}">${escape(CATEGORY_LABELS[c])}</a>`).join('')
+}
+
 export function renderArticlePage(article: Article, related: Article[]): string {
   const path = articlePath(article)
   const url = `${SITE}${path}`
@@ -73,6 +107,11 @@ export function renderArticlePage(article: Article, related: Article[]): string 
   const summary = article.summary || 'Read the original report for full details.'
   const description = summary.length > 160 ? summary.slice(0, 157).replace(/\s+\S*$/, '') + '…' : summary
 
+  const primary = primaryCategory(article)
+  const crumbs = breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Categories', path: '/category/' }, { name: CATEGORY_LABELS[primary], path: categoryPath(primary) }, { name: article.title }])
+  const categoryLinks = `<nav class="mt-6 flex flex-wrap items-center gap-2" aria-label="Article categories"><span class="text-xs font-semibold tracking-widest text-slate-500 uppercase mr-1">Filed under</span>${categoryChips(archiveCategories(article))}</nav>`
+  const archiveSlugs = new Set<string>(ARCHIVE_CATEGORIES)
+  const freeTags = article.categories.filter((t) => !archiveSlugs.has(t))
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
@@ -84,7 +123,8 @@ export function renderArticlePage(article: Article, related: Article[]): string 
     isBasedOn: original,
     sourceOrganization: { '@type': 'Organization', name: article.source },
     publisher: { '@type': 'Organization', name: 'Media Law News', url: SITE },
-    keywords: article.categories.join(', ') || undefined,
+    articleSection: CATEGORY_LABELS[primary],
+    keywords: [...new Set([...archiveCategories(article).map((c) => CATEGORY_LABELS[c]), ...freeTags])].join(', ') || undefined,
   }
 
   const head = `<meta name="description" content="${escape(description)}">
@@ -96,7 +136,8 @@ export function renderArticlePage(article: Article, related: Article[]): string 
 <meta property="og:url" content="${escape(url)}">
 <meta property="article:published_time" content="${article.publishedAt.toISOString()}">
 <meta name="twitter:card" content="summary">
-<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>`
+<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
+${crumbs.jsonLd}`
 
   const relatedHtml = related.length
     ? related
@@ -115,14 +156,14 @@ export function renderArticlePage(article: Article, related: Article[]): string 
         .join('\n')
     : '<li class="text-sm text-slate-500">No related articles yet.</li>'
 
-  const tags = article.categories.length
-    ? `<ul class="mt-6 flex flex-wrap gap-2">${article.categories
+  const tags = freeTags.length
+    ? `<ul class="mt-6 flex flex-wrap gap-2">${freeTags
         .map((t) => `<li class="text-xs bg-slate-100 text-slate-600 rounded-full px-3 py-1">${escape(t)}</li>`)
         .join('')}</ul>`
     : ''
 
   const body = `<main class="max-w-4xl mx-auto px-6 py-12">
-  <nav class="text-xs text-slate-500 mb-6" aria-label="Breadcrumb"><a href="/" class="hover:text-blue-800">Home</a> <span class="mx-1">/</span> <a href="/#news" class="hover:text-blue-800">News</a> <span class="mx-1">/</span> <span>${escape(article.year)}</span></nav>
+  ${crumbs.html}
   <article class="bg-white border border-slate-200 rounded-3xl p-8 md:p-12">
     <div class="flex flex-wrap items-center gap-3">
       <span class="category-tag ${TOPIC_COLORS[topic] ?? 'bg-slate-100 text-slate-700'}">${escape(TOPIC_LABELS[topic] ?? 'News')}</span>
@@ -130,6 +171,7 @@ export function renderArticlePage(article: Article, related: Article[]): string 
     </div>
     <h1 class="heading-serif mt-5 text-3xl md:text-4xl leading-tight text-slate-950">${escape(article.title)}</h1>
     <p class="mt-4 text-sm text-slate-600">Source: <span class="font-semibold text-slate-800">${escape(article.source)}</span></p>
+    ${categoryLinks}
 
     <section class="mt-8" aria-labelledby="summary-heading">
       <h2 id="summary-heading" class="text-xs font-semibold tracking-widest text-blue-700 uppercase">Summary</h2>
@@ -166,4 +208,88 @@ export function renderNotFoundPage(): string {
   <a href="/#news" class="inline-block mt-8 bg-blue-900 text-white rounded-3xl px-6 py-3 text-sm font-semibold">Browse the latest news</a>
 </main>`
   )
+}
+
+export function renderCategoryPage(category: ArchiveCategory, result: CategoryPage): string {
+  const { articles, total, page, totalPages, perPage } = result
+  const label = CATEGORY_LABELS[category]
+  const path = categoryPath(category, page)
+  const crumbList: Crumb[] = [{ name: 'Home', path: '/' }, { name: 'Categories', path: '/category/' }]
+  crumbList.push(page > 1 ? { name: label, path: categoryPath(category) } : { name: label })
+  if (page > 1) crumbList.push({ name: `Page ${page}` })
+  const crumbs = breadcrumbs(crumbList)
+  const title = `${label}${page > 1 ? ` — Page ${page}` : ''} | Media Law News`
+  const description = `${CATEGORY_DESCRIPTIONS[category]} Browse ${label} coverage from Media Law News.`
+
+  const head = `<meta name="description" content="${escape(description)}">
+<link rel="canonical" href="${SITE}${path}">
+${page > 1 ? `<link rel="prev" href="${SITE}${categoryPath(category, page - 1)}">` : ''}
+${page < totalPages ? `<link rel="next" href="${SITE}${categoryPath(category, page + 1)}">` : ''}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Media Law News">
+<meta property="og:title" content="${escape(title)}">
+<meta property="og:description" content="${escape(description)}">
+<meta property="og:url" content="${SITE}${path}">
+${crumbs.jsonLd}`
+
+  const cards = articles.map((a) => `<li>
+      <article class="bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 transition">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+          <span class="font-semibold text-blue-700">${escape(a.source)}</span>
+          <time class="font-mono" datetime="${a.publishedAt.toISOString()}">${shortDate(a.publishedAt)}</time>
+        </div>
+        <h2 class="mt-2 text-xl font-semibold leading-snug"><a href="${escape(articlePath(a))}" class="hover:text-blue-800">${escape(a.title)}</a></h2>
+        <p class="mt-3 text-sm leading-6 text-slate-600">${escape(truncate(a.summary || 'Read the original report for full details.', 260))}</p>
+        <div class="mt-4 flex flex-wrap gap-2">${categoryChips(archiveCategories(a), category)}</div>
+      </article>
+    </li>`).join('\n')
+
+  const pageLink = (n: number, text: string, opts: { current?: boolean; rel?: string } = {}) => opts.current
+    ? `<span aria-current="page" class="min-w-10 text-center px-3 py-2 rounded-2xl bg-blue-900 text-white text-sm font-semibold">${text}</span>`
+    : `<a href="${categoryPath(category, n)}" ${opts.rel ? `rel="${opts.rel}"` : ''} class="min-w-10 text-center px-3 py-2 rounded-2xl border border-slate-200 bg-white text-sm text-blue-900 hover:bg-blue-50">${text}</a>`
+  const numbers: (number | '…')[] = []
+  for (let n = 1; n <= totalPages; n++) {
+    if (n === 1 || n === totalPages || Math.abs(n - page) <= 2) numbers.push(n)
+    else if (numbers[numbers.length - 1] !== '…') numbers.push('…')
+  }
+  const pagination = totalPages > 1 ? `<nav class="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination">
+    ${page > 1 ? pageLink(page - 1, '<i class="fa-solid fa-arrow-left text-xs"></i> Previous', { rel: 'prev' }) : ''}
+    ${numbers.map((n) => n === '…' ? '<span class="px-2 text-slate-400">…</span>' : pageLink(n, String(n), { current: n === page })).join('')}
+    ${page < totalPages ? pageLink(page + 1, 'Next <i class="fa-solid fa-arrow-right text-xs"></i>', { rel: 'next' }) : ''}
+  </nav>` : ''
+
+  const first = total ? (page - 1) * perPage + 1 : 0
+  const last = first ? first + articles.length - 1 : 0
+
+  const body = `<main class="max-w-4xl mx-auto px-6 py-12">
+  ${crumbs.html}
+  <header>
+    <p class="text-xs font-semibold tracking-widest text-blue-700 uppercase">Category</p>
+    <h1 class="heading-serif mt-2 text-4xl text-slate-950">${escape(label)}</h1>
+    <p class="mt-3 text-slate-600 leading-7">${escape(CATEGORY_DESCRIPTIONS[category])}</p>
+    <p class="mt-2 text-sm text-slate-500">${total ? `Showing ${first}–${last} of ${total} ${total === 1 ? 'article' : 'articles'} · Page ${page} of ${totalPages}` : 'No articles yet'}</p>
+  </header>
+  <nav class="mt-6 flex flex-wrap gap-2" aria-label="All categories">${categoryChips(ARCHIVE_CATEGORIES, category)}</nav>
+  ${cards ? `<ul class="mt-8 space-y-4">${cards}</ul>` : '<p class="mt-8 bg-white border border-slate-200 rounded-3xl p-6 text-slate-600">No articles are filed in this category yet. Check back soon.</p>'}
+  ${pagination}
+</main>`
+  return shell(title, head, body)
+}
+
+export function renderCategoryIndex(counts: Record<ArchiveCategory, number>): string {
+  const crumbs = breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Categories' }])
+  const head = `<meta name="description" content="Browse Media Law News coverage by category: media law, First Amendment, entertainment law, privacy, defamation, journalism, technology law and the Supreme Court.">
+<link rel="canonical" href="${SITE}/category/">
+${crumbs.jsonLd}`
+  const cards = ARCHIVE_CATEGORIES.map((c) => `<li><a href="${categoryPath(c)}" class="group block h-full bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 transition">
+      <div class="flex items-baseline justify-between gap-3"><h2 class="text-lg font-semibold group-hover:text-blue-800">${escape(CATEGORY_LABELS[c])}</h2><span class="text-xs font-mono text-slate-500">${counts[c]} ${counts[c] === 1 ? 'article' : 'articles'}</span></div>
+      <p class="mt-2 text-sm leading-6 text-slate-600">${escape(CATEGORY_DESCRIPTIONS[c])}</p>
+    </a></li>`).join('\n')
+  const body = `<main class="max-w-4xl mx-auto px-6 py-12">
+  ${crumbs.html}
+  <h1 class="heading-serif text-4xl text-slate-950">Categories</h1>
+  <p class="mt-3 text-slate-600">Every story on Media Law News is automatically filed into one or more of these archives.</p>
+  <ul class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">${cards}</ul>
+</main>`
+  return shell('Categories | Media Law News', head, body)
 }

@@ -52,31 +52,68 @@ export function classifyTopic(text: string, fallback: Topic): Topic {
   return fallback
 }
 
+export const CATEGORY_DESCRIPTIONS: Record<ArchiveCategory, string> = {
+  'media-law': 'Legal developments affecting publishers, broadcasters, platforms and the news business.',
+  'first-amendment': 'Free speech, free press, censorship and prior-restraint cases and commentary.',
+  'entertainment-law': 'Copyright, trademark, right of publicity, licensing and disputes across film, music and streaming.',
+  privacy: 'Data protection, surveillance, biometrics and the privacy torts.',
+  defamation: 'Libel, slander, false light and anti-SLAPP litigation.',
+  journalism: 'Press freedom, newsgathering, shield laws, subpoenas and reporters\' rights.',
+  'technology-law': 'Section 230, AI, social media, platform regulation and internet law.',
+  scotus: 'U.S. Supreme Court cases, arguments and opinions touching media and speech.',
+}
+
+const STATES = 'alabama|alaska|arizona|arkansas|california|colorado|connecticut|delaware|florida|georgia|hawaii|idaho|illinois|indiana|iowa|kansas|kentucky|louisiana|maine|maryland|massachusetts|michigan|minnesota|mississippi|missouri|montana|nebraska|nevada|new hampshire|new jersey|new mexico|new york|north carolina|north dakota|ohio|oklahoma|oregon|pennsylvania|rhode island|south carolina|south dakota|tennessee|texas|utah|vermont|virginia|washington|west virginia|wisconsin|wyoming|state|india|indian|uk|u\\.k\\.|canada|canadian|israel|israeli|brazil|brazilian|county'
+const STATE_COURT = new RegExp(`(${STATES})('s)?\\s+supreme court`, 'gi')
+
+// True when the text refers to the U.S. Supreme Court rather than only a state or foreign high court.
+function mentionsScotus(text: string): boolean {
+  if (/(scotus|supreme court of the united states|u\.s\. supreme court|us supreme court|united states supreme court|justices? (alito|thomas|roberts|sotomayor|kagan|gorsuch|kavanaugh|barrett|ketanji))/i.test(text)) return true
+  const all = text.match(/supreme court/gi)?.length ?? 0
+  const state = text.match(STATE_COURT)?.length ?? 0
+  return all > state
+}
+
 const ARCHIVE_RULES: [ArchiveCategory, RegExp][] = [
-  ['scotus', /(supreme court of the united states|u\.s\. supreme court|scotus|supreme court)/i],
-  ['first-amendment', /(first amendment|free speech|free expression|freedom of (speech|the press)|censorship|prior restraint|book ban)/i],
-  ['entertainment-law', /(entertainment|copyright|trademark|music industry|film|hollywood|streaming|right of publicity|royalt|licens)/i],
-  ['privacy', /(privacy|data protection|surveillance|personal data|biometric|facial recognition)/i],
-  ['defamation', /(defamation|libel|slander|false light|anti-slapp|reputation)/i],
-  ['journalism', /(journalis|reporter|newsroom|news media|press freedom|newsgathering|shield law|news organization)/i],
-  ['technology-law', /(technology|tech company|artificial intelligence|\bai\b|social media|platform|section 230|internet|algorithm|data breach)/i],
-  ['media-law', /(media law|media company|news organization|journalis|press|broadcast|publisher|newspaper|first amendment|defamation|privacy)/i],
+  ['first-amendment', /(first amendment|free speech|free expression|freedom of (speech|the press|expression)|censorship|censor(ed|s)?\b|prior restraint|book ban)/i],
+  ['entertainment-law', /(entertainment|copyright|trademark|music (industry|label|publisher)|\bfilm|hollywood|streaming|right of publicity|royalt|record label|\bstudio)/i],
+  ['privacy', /(privacy|data protection|surveillance|personal data|biometric|facial recognition|gdpr|ccpa|wiretap)/i],
+  ['defamation', /(defamation|defamatory|libel|slander|false light|anti-slapp)/i],
+  ['journalism', /(journalis|reporters?\b|newsroom|news media|press freedom|freedom of the press|newsgathering|shield law|news organi[sz]ation|foia|public records)/i],
+  ['technology-law', /(\btechnology|tech compan|artificial intelligence|\bai\b|generative|social media|section 230|\binternet\b|online platform|algorithm|data breach|deepfake|tiktok|meta platforms|youtube|\bx corp)/i],
+  ['media-law', /(media law|media compan|news organi[sz]ation|journalis|\bpress\b|broadcast|\bpublishers?\b|newspaper|\bfcc\b)/i],
 ]
 
-export function archiveCategories(article: Pick<Article, 'title' | 'summary' | 'source' | 'topic' | 'categories'>): ArchiveCategory[] {
-  const text = `${article.title} ${article.summary} ${article.source} ${(article.categories || []).join(' ')} ${article.topic}`
+const TOPIC_CATEGORY: Record<Topic, ArchiveCategory> = {
+  'first-amendment': 'first-amendment',
+  'media-law': 'media-law',
+  entertainment: 'entertainment-law',
+  'defamation-privacy': 'privacy',
+}
+
+type Categorizable = Pick<Article, 'title' | 'summary' | 'source' | 'topic' | 'categories'>
+const categorizableText = (a: Categorizable) => `${a.title} ${a.summary} ${a.source} ${(a.categories || []).join(' ')}`
+
+// Auto-categorizes an article from its headline, summary, source and feed tags.
+// Every article lands in at least one archive (the one matching its topic).
+export function archiveCategories(article: Categorizable): ArchiveCategory[] {
+  const text = categorizableText(article)
   const found = new Set<ArchiveCategory>()
-  const topicCategory: Partial<Record<Topic, ArchiveCategory>> = {
-    'first-amendment': 'first-amendment',
-    'media-law': 'media-law',
-    entertainment: 'entertainment-law',
-    'defamation-privacy': 'privacy',
-  }
-  const defaultCategory = topicCategory[article.topic as Topic] || 'media-law'
   for (const [category, pattern] of ARCHIVE_RULES) if (pattern.test(text)) found.add(category)
-  if (defaultCategory === 'privacy' && /(defamation|libel|slander|anti-slapp)/i.test(text)) found.add('defamation')
-  found.add(defaultCategory)
+  if (mentionsScotus(text)) found.add('scotus')
+  const fallback = TOPIC_CATEGORY[article.topic as Topic] || 'media-law'
+  // The combined "defamation & privacy" topic only implies privacy if nothing more specific matched.
+  if (fallback !== 'privacy' || !found.has('defamation')) found.add(fallback)
   return ARCHIVE_CATEGORIES.filter((category) => found.has(category))
+}
+
+// The single category used for breadcrumbs: the most specific match, preferring the article's topic.
+export function primaryCategory(article: Categorizable): ArchiveCategory {
+  const cats = archiveCategories(article)
+  const topicCat = TOPIC_CATEGORY[article.topic as Topic]
+  const priority: ArchiveCategory[] = ['scotus', 'defamation', 'privacy', 'first-amendment', 'entertainment-law', 'technology-law', 'journalism', 'media-law']
+  if (topicCat && cats.includes(topicCat) && topicCat !== 'media-law') return topicCat
+  return priority.find((c) => cats.includes(c)) || 'media-law'
 }
 
 const MAX_SLUG_LENGTH = 80
@@ -188,32 +225,27 @@ export async function findArticleBySourceUrl(sourceUrl: string): Promise<Article
   return row
 }
 
-// Fetch matching archive records in chronological order. Text predicates also
-// include articles stored before archive-category slugs were added to metadata.
-export async function articlesForCategory(category: ArchiveCategory): Promise<Article[]> {
-  const stored = sql`${articles.categories} ? ${category}`
-  const topicMatches: Partial<Record<ArchiveCategory, Topic[]>> = {
-    'media-law': ['media-law'], 'first-amendment': ['first-amendment'],
-    'entertainment-law': ['entertainment'], privacy: ['defamation-privacy'], defamation: ['defamation-privacy'],
-  }
-  const terms: Partial<Record<ArchiveCategory, string[]>> = {
-    'media-law': ['media law', 'journalist', 'press', 'broadcast', 'publisher', 'newspaper'],
-    'first-amendment': ['first amendment', 'free speech', 'censorship', 'prior restraint', 'book ban'],
-    'entertainment-law': ['entertainment', 'copyright', 'music', 'film', 'hollywood', 'streaming', 'trademark'],
-    privacy: ['privacy', 'surveillance', 'data protection', 'biometric', 'facial recognition'],
-    defamation: ['defamation', 'libel', 'slander', 'anti-slapp', 'false light'],
-    journalism: ['journalist', 'reporter', 'newsroom', 'newsgathering', 'press freedom', 'shield law'],
-    'technology-law': ['technology', 'artificial intelligence', 'social media', 'platform', 'section 230', 'internet', 'algorithm', 'data breach'],
-    scotus: ['supreme court', 'scotus'],
-  }
-  const matches = [stored]
-  for (const topic of topicMatches[category] || []) matches.push(eq(articles.topic, topic))
-  for (const term of terms[category] || []) {
-    const pattern = `%${term}%`
-    matches.push(or(sql`${articles.title} ilike ${pattern}`, sql`${articles.summary} ilike ${pattern}`, sql`${articles.source} ilike ${pattern}`)!)
-  }
-  const rows = await db.select().from(articles).where(or(...matches)!).orderBy(desc(articles.publishedAt))
-  return rows.filter((article) => archiveCategories(article).includes(category))
+export type CategoryPage = { articles: Article[]; total: number; page: number; totalPages: number; perPage: number }
+
+// Categorizes the whole archive in one pass (newest first). Categories are recomputed
+// from article text so older rows and rule improvements apply retroactively.
+async function categorizedArchive(): Promise<{ article: Article; categories: ArchiveCategory[] }[]> {
+  const rows = await db.select().from(articles).orderBy(desc(articles.publishedAt), desc(articles.id))
+  return rows.map((article) => ({ article, categories: archiveCategories(article) }))
+}
+
+// Returns null when the requested page is past the end of the archive.
+export async function articlesForCategory(category: ArchiveCategory, page: number, perPage: number): Promise<CategoryPage | null> {
+  const matches = (await categorizedArchive()).filter((row) => row.categories.includes(category)).map((row) => row.article)
+  const totalPages = Math.max(1, Math.ceil(matches.length / perPage))
+  if (page > totalPages) return null
+  return { articles: matches.slice((page - 1) * perPage, page * perPage), total: matches.length, page, totalPages, perPage }
+}
+
+export async function categoryCounts(): Promise<Record<ArchiveCategory, number>> {
+  const counts = Object.fromEntries(ARCHIVE_CATEGORIES.map((c) => [c, 0])) as Record<ArchiveCategory, number>
+  for (const row of await categorizedArchive()) for (const c of row.categories) counts[c]++
+  return counts
 }
 
 export async function relatedArticles(article: Article, limit = 6): Promise<Article[]> {
