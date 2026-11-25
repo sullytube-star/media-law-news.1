@@ -7,7 +7,11 @@ import { XMLParser } from 'fast-xml-parser'
 // RSS feed whose listing page is scraped instead.
 type FeedFormat = 'rss' | 'mandell-html' | 'newsweek-topic'
 
-export const FEEDS: { url: string; source: string; format?: FeedFormat }[] = [
+// Matches stories on the site's beat. General-news feeds set `onTopic: true`
+// so only their media, speech, privacy and entertainment stories are kept.
+const ON_TOPIC = /\b(first amendment|free speech|free press|freedom of (the )?press|press freedom|speech|censor\w*|defamation|defam\w+|libel\w*|slander|privacy|surveillance|copyright\w*|trademark\w*|right of publicity|intellectual property|entertainment|music\w*|musician|record label|film\w*|movie\w*|hollywood|studio|streaming|broadcast\w*|television|tv|netflix|disney|journalis\w+|reporters?|newspapers?|news media|media|publish\w*|social media|section 230|book ban\w*|celebrit\w+|actors?|actress|singer|rapper|artists?|sag-aftra|iatse|anti-slapp|foia|public records)\b/i
+
+export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?: boolean }[] = [
   { url: 'https://www.scotusblog.com/feed/', source: 'SCOTUSblog' },
   { url: 'https://firstamendmentwatch.org/feed/', source: 'First Amendment Watch' },
   // Official RSS for nytimes.com/topic/subject/first-amendment-us-constitution
@@ -32,6 +36,13 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat }[] = [
   { url: 'https://www.billboard.com/t/live-nation/feed/', source: 'Billboard Live Nation' },
   { url: 'https://broadwaynews.com/feed/', source: 'Broadway News' },
   { url: 'https://www.mandellpc.com/news', source: 'Mandell P.C.', format: 'mandell-html' },
+  // Courthouse News Service site-wide feed covers all news, so it is filtered to on-topic stories.
+  { url: 'https://www.courthousenews.com/feed/', source: 'Courthouse News', onTopic: true },
+  // Courthouse News Service category feeds (WordPress /feed/ for each category page).
+  { url: 'https://www.courthousenews.com/category/media/feed/', source: 'Courthouse News · Media' },
+  { url: 'https://www.courthousenews.com/category/entertainment/feed/', source: 'Courthouse News · Entertainment' },
+  { url: 'https://www.courthousenews.com/category/civil-rights/feed/', source: 'Courthouse News · Civil Rights' },
+  { url: 'https://www.courthousenews.com/category/appeals/feed/', source: 'Courthouse News · Appeals' },
 ]
 
 const MAX_ITEMS_PER_FEED = 25
@@ -269,9 +280,10 @@ export async function refreshFeeds(): Promise<Snapshot> {
   const now = new Date().toISOString()
 
   const feeds = await Promise.all(
-    FEEDS.map(async ({ url, source, format }): Promise<FeedResult> => {
+    FEEDS.map(async ({ url, source, format, onTopic }): Promise<FeedResult> => {
       try {
-        const items = await fetchOne(url, format)
+        let items = await fetchOne(url, format)
+        if (onTopic) items = items.filter((i) => ON_TOPIC.test(`${i.title} ${i.description.slice(0, 600)} ${i.categories.join(' ')}`))
         return { url, source, status: 'ok', fetchedAt: now, checkedAt: now, items }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
