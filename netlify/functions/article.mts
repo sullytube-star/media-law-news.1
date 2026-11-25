@@ -1,8 +1,6 @@
 import type { Config, Context } from '@netlify/functions'
-import { articlePath, archiveCategories, findArticle, findArticleBySourceUrl, legacySourceUrl, relatedArticles, CATEGORY_LABELS, type ArchiveCategory } from '../lib/articles.ts'
+import { articlePath, findArticle, findArticleBySourceUrl, legacySourceUrl, relatedArticles } from '../lib/articles.ts'
 import { renderArticlePage, renderNotFoundPage } from '../lib/article-page.ts'
-
-const escape = (value: string) => value.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
 
 export default async (_request: Request, context: Context) => {
   const { year, slug } = context.params
@@ -16,13 +14,7 @@ export default async (_request: Request, context: Context) => {
     return notFound()
   }
 
-  const related = await relatedArticles(article)
-  let html = renderArticlePage(article, related)
-  const categoryLinks = archiveCategories(article).map((category) =>
-    `<a class="text-xs font-semibold text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-full px-3 py-1" href="/category/${category}/">${escape(CATEGORY_LABELS[category as ArchiveCategory])}</a>`
-  ).join(' ')
-  const categoriesBlock = `<nav class="mt-6 flex flex-wrap gap-2" aria-label="Article categories">${categoryLinks}</nav>`
-  html = html.replace('<section class="mt-8" aria-labelledby="summary-heading">', `${categoriesBlock}\n<section class="mt-8" aria-labelledby="summary-heading">`)
+  const html = renderArticlePage(article, await relatedArticles(article))
   return new Response(html, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
