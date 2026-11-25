@@ -58,7 +58,7 @@ body { font-family: 'Inter', system-ui, sans-serif; }
       <span class="w-9 h-9 bg-blue-900 text-white rounded-2xl flex items-center justify-center"><i class="fa-solid fa-scale-balanced"></i></span>
       <span class="heading-serif text-xl text-blue-950">Media Law News</span>
     </a>
-    <nav class="flex items-center gap-x-5 text-sm font-medium text-slate-600"><a href="/category/" class="hover:text-blue-800">Categories</a><a href="/#news" class="hover:text-blue-800">Latest news</a></nav>
+    <nav class="flex items-center gap-x-5 text-sm font-medium text-slate-600"><a href="/archive/" class="hover:text-blue-800">Archive</a><a href="/category/" class="hover:text-blue-800">Categories</a><a href="/#news" class="hover:text-blue-800">Latest news</a></nav>
   </div>
 </header>
 ${body}
@@ -292,4 +292,69 @@ ${crumbs.jsonLd}`
   <ul class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">${cards}</ul>
 </main>`
   return shell('Categories | Media Law News', head, body)
+}
+
+export function archivePath(page = 1): string {
+  return page > 1 ? `/archive/page/${page}/` : '/archive/'
+}
+
+// The full news archive: every article, newest first, with source, categories and date.
+export function renderArchivePage(result: CategoryPage): string {
+  const { articles, total, page, totalPages, perPage } = result
+  const path = archivePath(page)
+  const crumbList: Crumb[] = [{ name: 'Home', path: '/' }]
+  crumbList.push(page > 1 ? { name: 'Archive', path: archivePath() } : { name: 'Archive' })
+  if (page > 1) crumbList.push({ name: `Page ${page}` })
+  const crumbs = breadcrumbs(crumbList)
+  const title = `News Archive${page > 1 ? ` — Page ${page}` : ''} | Media Law News`
+  const description = 'Every story covered by Media Law News, newest first: media law, First Amendment, entertainment law, privacy, defamation, journalism, technology law and Supreme Court news.'
+
+  const head = `<meta name="description" content="${escape(description)}">
+<link rel="canonical" href="${SITE}${path}">
+${page > 1 ? `<link rel="prev" href="${SITE}${archivePath(page - 1)}">` : ''}
+${page < totalPages ? `<link rel="next" href="${SITE}${archivePath(page + 1)}">` : ''}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Media Law News">
+<meta property="og:title" content="${escape(title)}">
+<meta property="og:description" content="${escape(description)}">
+<meta property="og:url" content="${SITE}${path}">
+${crumbs.jsonLd}`
+
+  const rows = articles.map((a) => `<li>
+      <article class="bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-5 transition">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+          <span><span class="sr-only">Source: </span><span class="font-semibold text-blue-700">${escape(a.source)}</span></span>
+          <span aria-hidden="true" class="text-slate-300">·</span>
+          <time class="font-mono" datetime="${a.publishedAt.toISOString()}">${shortDate(a.publishedAt)}</time>
+        </div>
+        <h2 class="mt-2 text-lg font-semibold leading-snug"><a href="${escape(articlePath(a))}" class="hover:text-blue-800">${escape(a.title)}</a></h2>
+        <div class="mt-3 flex flex-wrap items-center gap-2"><span class="sr-only">Categories:</span>${categoryChips(archiveCategories(a))}</div>
+      </article>
+    </li>`).join('\n')
+
+  const navLink = (n: number, html: string, rel: string) => `<a href="${archivePath(n)}" rel="${rel}" class="inline-flex items-center gap-x-2 px-4 py-2 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-blue-900 hover:bg-blue-50">${html}</a>`
+  const disabled = (html: string) => `<span aria-disabled="true" class="inline-flex items-center gap-x-2 px-4 py-2 rounded-2xl border border-slate-100 bg-slate-50 text-sm font-semibold text-slate-300">${html}</span>`
+  const prevHtml = '<i class="fa-solid fa-arrow-left text-xs"></i> Previous'
+  const nextHtml = 'Next <i class="fa-solid fa-arrow-right text-xs"></i>'
+  const pagination = totalPages > 1 ? `<nav class="mt-10 flex items-center justify-between gap-4" aria-label="Pagination">
+    ${page > 1 ? navLink(page - 1, prevHtml, 'prev') : disabled(prevHtml)}
+    <span class="text-sm text-slate-500">Page ${page} of ${totalPages}</span>
+    ${page < totalPages ? navLink(page + 1, nextHtml, 'next') : disabled(nextHtml)}
+  </nav>` : ''
+
+  const first = total ? (page - 1) * perPage + 1 : 0
+  const last = first ? first + articles.length - 1 : 0
+
+  const body = `<main class="max-w-4xl mx-auto px-6 py-12">
+  ${crumbs.html}
+  <header>
+    <p class="text-xs font-semibold tracking-widest text-blue-700 uppercase">Archive</p>
+    <h1 class="heading-serif mt-2 text-4xl text-slate-950">News Archive</h1>
+    <p class="mt-3 text-slate-600 leading-7">Every story on Media Law News, newest first. Browse by topic on the <a href="/category/" class="text-blue-800 underline underline-offset-2">category pages</a>.</p>
+    <p class="mt-2 text-sm text-slate-500">${total ? `Showing ${first}–${last} of ${total} ${total === 1 ? 'article' : 'articles'} · Page ${page} of ${totalPages}` : 'No articles yet'}</p>
+  </header>
+  ${rows ? `<ol class="mt-8 space-y-3">${rows}</ol>` : '<p class="mt-8 bg-white border border-slate-200 rounded-3xl p-6 text-slate-600">No articles have been archived yet. Check back soon.</p>'}
+  ${pagination}
+</main>`
+  return shell(title, head, body)
 }
