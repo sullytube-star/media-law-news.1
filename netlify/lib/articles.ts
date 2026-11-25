@@ -225,6 +225,14 @@ export async function findArticleBySourceUrl(sourceUrl: string): Promise<Article
   return row
 }
 
+export const ARCHIVE_PER_PAGE = 25
+export const CATEGORY_PER_PAGE = 20
+
+// Every article, newest first. Used by the build-time search indexer.
+export async function allArticles(): Promise<Article[]> {
+  return db.select().from(articles).orderBy(desc(articles.publishedAt), desc(articles.id))
+}
+
 export type CategoryPage = { articles: Article[]; total: number; page: number; totalPages: number; perPage: number }
 
 // Categorizes the whole archive in one pass (newest first). Categories are recomputed

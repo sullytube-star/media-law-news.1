@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Media Law News • Media Law, Entertainment Law & First Amendment Aggregator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/search.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap');
@@ -103,9 +104,20 @@
                         <input id="global-search" 
                                type="text" 
                                placeholder="Search cases or news..." 
-                               class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 focus:border-blue-600 rounded-3xl text-sm placeholder:text-slate-400 focus:outline-none">
+                               aria-describedby="global-search-hint"
+                               class="w-full pl-10 pr-24 py-2.5 bg-white border border-slate-300 focus:border-blue-600 rounded-3xl text-sm placeholder:text-slate-400 focus:outline-none">
                         <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                        <button type="button" id="global-search-all"
+                                class="absolute right-1.5 top-1.5 px-3 py-1.5 rounded-3xl bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs font-semibold"
+                                title="Full-text search of every article, category and archive page">All news</button>
+                        <span id="global-search-hint" class="sr-only">Filters this page as you type. Press Enter to search every article, category and archive page.</span>
                     </div>
+
+                    <!-- Mobile site search -->
+                    <button type="button" data-site-search aria-label="Search Media Law News"
+                            class="md:hidden w-10 h-10 flex items-center justify-center text-slate-600 hover:text-slate-900">
+                        <i class="fa-solid fa-magnifying-glass text-xl"></i>
+                    </button>
                     
                     <button onclick="showSubscribeModal()"
                             class="hidden md:flex items-center gap-x-2 px-5 py-2.5 bg-blue-900 hover:bg-blue-800 transition-colors text-white text-sm font-semibold rounded-3xl">
@@ -1051,6 +1063,17 @@
         // Global Search
         function setupGlobalSearch() {
             const searchInput = document.getElementById('global-search');
+
+            // Enter (or the "All news" button) runs a full-text Pagefind search across the whole site.
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && window.__siteSearch) {
+                    e.preventDefault();
+                    window.__siteSearch.open(searchInput.value.trim());
+                }
+            });
+            document.getElementById('global-search-all').addEventListener('click', () => {
+                if (window.__siteSearch) window.__siteSearch.open(searchInput.value.trim());
+            });
             
             searchInput.addEventListener('input', () => {
                 const term = searchInput.value.toLowerCase().trim();

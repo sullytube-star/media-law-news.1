@@ -43,6 +43,7 @@ function shell(title: string, head: string, body: string): string {
 <title>${escape(title)}</title>
 ${head}
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="/search.js" defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap');
@@ -58,7 +59,8 @@ body { font-family: 'Inter', system-ui, sans-serif; }
       <span class="w-9 h-9 bg-blue-900 text-white rounded-2xl flex items-center justify-center"><i class="fa-solid fa-scale-balanced"></i></span>
       <span class="heading-serif text-xl text-blue-950">Media Law News</span>
     </a>
-    <nav class="flex items-center gap-x-5 text-sm font-medium text-slate-600"><a href="/archive/" class="hover:text-blue-800">Archive</a><a href="/category/" class="hover:text-blue-800">Categories</a><a href="/#news" class="hover:text-blue-800">Latest news</a></nav>
+    <nav class="flex items-center gap-x-4 sm:gap-x-5 text-sm font-medium text-slate-600"><a href="/archive/" class="hover:text-blue-800">Archive</a><a href="/category/" class="hover:text-blue-800">Categories</a><a href="/#news" class="hidden sm:inline hover:text-blue-800">Latest news</a>
+      <button type="button" data-site-search aria-label="Search Media Law News" class="inline-flex items-center gap-x-2 rounded-3xl border border-slate-300 bg-white px-3 py-1.5 text-slate-500 hover:border-blue-600 hover:text-blue-800"><i class="fa-solid fa-magnifying-glass text-xs"></i><span class="hidden sm:inline">Search</span><kbd class="hidden md:inline text-[10px] font-mono text-slate-400 border border-slate-200 rounded px-1">/</kbd></button></nav>
   </div>
 </header>
 ${body}
@@ -86,7 +88,7 @@ function breadcrumbs(crumbs: Crumb[]): { html: string; jsonLd: string } {
     itemListElement: crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, ...(c.path ? { item: `${SITE}${c.path}` } : {}) })),
   }
   return {
-    html: `<nav class="text-xs text-slate-500 mb-6" aria-label="Breadcrumb"><ol class="flex flex-wrap items-center gap-x-2 gap-y-1">${items}</ol></nav>`,
+    html: `<nav class="text-xs text-slate-500 mb-6" aria-label="Breadcrumb" data-pagefind-ignore><ol class="flex flex-wrap items-center gap-x-2 gap-y-1">${items}</ol></nav>`,
     jsonLd: `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`,
   }
 }
@@ -95,8 +97,8 @@ export function categoryPath(category: ArchiveCategory, page = 1): string {
   return page > 1 ? `/category/${category}/page/${page}/` : `/category/${category}/`
 }
 
-function categoryChips(categories: ArchiveCategory[], current?: ArchiveCategory): string {
-  return categories.map((c) => `<a href="${categoryPath(c)}" ${c === current ? 'aria-current="page"' : ''} class="text-xs font-semibold rounded-full px-3 py-1 transition ${c === current ? 'bg-blue-900 text-white' : 'bg-blue-50 text-blue-800 hover:bg-blue-100'}">${escape(CATEGORY_LABELS[c])}</a>`).join('')
+function categoryChips(categories: ArchiveCategory[], current?: ArchiveCategory, filter = false): string {
+  return categories.map((c) => `<a href="${categoryPath(c)}" ${filter ? 'data-pagefind-filter="category"' : ''} ${c === current ? 'aria-current="page"' : ''} class="text-xs font-semibold rounded-full px-3 py-1 transition ${c === current ? 'bg-blue-900 text-white' : 'bg-blue-50 text-blue-800 hover:bg-blue-100'}">${escape(CATEGORY_LABELS[c])}</a>`).join('')
 }
 
 export function renderArticlePage(article: Article, related: Article[]): string {
@@ -109,7 +111,7 @@ export function renderArticlePage(article: Article, related: Article[]): string 
 
   const primary = primaryCategory(article)
   const crumbs = breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Categories', path: '/category/' }, { name: CATEGORY_LABELS[primary], path: categoryPath(primary) }, { name: article.title }])
-  const categoryLinks = `<nav class="mt-6 flex flex-wrap items-center gap-2" aria-label="Article categories"><span class="text-xs font-semibold tracking-widest text-slate-500 uppercase mr-1">Filed under</span>${categoryChips(archiveCategories(article))}</nav>`
+  const categoryLinks = `<nav class="mt-6 flex flex-wrap items-center gap-2" aria-label="Article categories"><span class="text-xs font-semibold tracking-widest text-slate-500 uppercase mr-1">Filed under</span>${categoryChips(archiveCategories(article), undefined, true)}</nav>`
   const archiveSlugs = new Set<string>(ARCHIVE_CATEGORIES)
   const freeTags = article.categories.filter((t) => !archiveSlugs.has(t))
   const jsonLd = {
@@ -164,13 +166,16 @@ ${crumbs.jsonLd}`
 
   const body = `<main class="max-w-4xl mx-auto px-6 py-12">
   ${crumbs.html}
-  <article class="bg-white border border-slate-200 rounded-3xl p-8 md:p-12">
+  <article class="bg-white border border-slate-200 rounded-3xl p-8 md:p-12" data-pagefind-body data-pagefind-sort="date:${article.publishedAt.toISOString()}">
+    <span hidden data-pagefind-filter="type:Article"></span>
+    <span hidden data-pagefind-meta="date:${longDate(article.publishedAt)}"></span>
+    <span hidden data-pagefind-meta="source:${escape(article.source)}"></span>
     <div class="flex flex-wrap items-center gap-3">
       <span class="category-tag ${TOPIC_COLORS[topic] ?? 'bg-slate-100 text-slate-700'}">${escape(TOPIC_LABELS[topic] ?? 'News')}</span>
       <time class="text-sm text-slate-500" datetime="${article.publishedAt.toISOString()}">${longDate(article.publishedAt)}</time>
     </div>
     <h1 class="heading-serif mt-5 text-3xl md:text-4xl leading-tight text-slate-950">${escape(article.title)}</h1>
-    <p class="mt-4 text-sm text-slate-600">Source: <span class="font-semibold text-slate-800">${escape(article.source)}</span></p>
+    <p class="mt-4 text-sm text-slate-600">Source: <span class="font-semibold text-slate-800" data-pagefind-filter="source">${escape(article.source)}</span></p>
     ${categoryLinks}
 
     <section class="mt-8" aria-labelledby="summary-heading">
@@ -181,7 +186,7 @@ ${crumbs.jsonLd}`
 
     <div class="mt-10 pt-6 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <p class="text-sm text-slate-500">Originally reported by ${escape(article.source)}.</p>
-      <a href="${escape(original)}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-x-2 bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold rounded-3xl px-6 py-3">
+      <a href="${escape(original)}" target="_blank" rel="noopener" data-pagefind-ignore class="inline-flex items-center justify-center gap-x-2 bg-blue-900 hover:bg-blue-800 text-white text-sm font-semibold rounded-3xl px-6 py-3">
         Read the full story at ${escape(article.source)} <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
       </a>
     </div>
@@ -240,7 +245,7 @@ ${crumbs.jsonLd}`
         </div>
         <h2 class="mt-2 text-xl font-semibold leading-snug"><a href="${escape(articlePath(a))}" class="hover:text-blue-800">${escape(a.title)}</a></h2>
         <p class="mt-3 text-sm leading-6 text-slate-600">${escape(truncate(a.summary || 'Read the original report for full details.', 260))}</p>
-        <div class="mt-4 flex flex-wrap gap-2">${categoryChips(archiveCategories(a), category)}</div>
+        <div class="mt-4 flex flex-wrap gap-2" data-pagefind-ignore>${categoryChips(archiveCategories(a), category)}</div>
       </article>
     </li>`).join('\n')
 
@@ -252,7 +257,7 @@ ${crumbs.jsonLd}`
     if (n === 1 || n === totalPages || Math.abs(n - page) <= 2) numbers.push(n)
     else if (numbers[numbers.length - 1] !== '…') numbers.push('…')
   }
-  const pagination = totalPages > 1 ? `<nav class="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination">
+  const pagination = totalPages > 1 ? `<nav class="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination" data-pagefind-ignore>
     ${page > 1 ? pageLink(page - 1, '<i class="fa-solid fa-arrow-left text-xs"></i> Previous', { rel: 'prev' }) : ''}
     ${numbers.map((n) => n === '…' ? '<span class="px-2 text-slate-400">…</span>' : pageLink(n, String(n), { current: n === page })).join('')}
     ${page < totalPages ? pageLink(page + 1, 'Next <i class="fa-solid fa-arrow-right text-xs"></i>', { rel: 'next' }) : ''}
@@ -261,16 +266,18 @@ ${crumbs.jsonLd}`
   const first = total ? (page - 1) * perPage + 1 : 0
   const last = first ? first + articles.length - 1 : 0
 
-  const body = `<main class="max-w-4xl mx-auto px-6 py-12">
+  const body = `<main class="max-w-4xl mx-auto px-6 py-12" data-pagefind-body>
+  <span hidden data-pagefind-filter="type:Category page"></span>
+  <span hidden data-pagefind-filter="category:${escape(label)}"></span>
   ${crumbs.html}
   <header>
     <p class="text-xs font-semibold tracking-widest text-blue-700 uppercase">Category</p>
     <h1 class="heading-serif mt-2 text-4xl text-slate-950">${escape(label)}</h1>
     <p class="mt-3 text-slate-600 leading-7">${escape(CATEGORY_DESCRIPTIONS[category])}</p>
-    <p class="mt-2 text-sm text-slate-500">${total ? `Showing ${first}–${last} of ${total} ${total === 1 ? 'article' : 'articles'} · Page ${page} of ${totalPages}` : 'No articles yet'}</p>
+    <p class="mt-2 text-sm text-slate-500" data-pagefind-ignore>${total ? `Showing ${first}–${last} of ${total} ${total === 1 ? 'article' : 'articles'} · Page ${page} of ${totalPages}` : 'No articles yet'}</p>
   </header>
-  <nav class="mt-6 flex flex-wrap gap-2" aria-label="All categories">${categoryChips(ARCHIVE_CATEGORIES, category)}</nav>
-  ${cards ? `<ul class="mt-8 space-y-4">${cards}</ul>` : '<p class="mt-8 bg-white border border-slate-200 rounded-3xl p-6 text-slate-600">No articles are filed in this category yet. Check back soon.</p>'}
+  <nav class="mt-6 flex flex-wrap gap-2" aria-label="All categories" data-pagefind-ignore>${categoryChips(ARCHIVE_CATEGORIES, category)}</nav>
+  ${cards ? `<ul class="mt-8 space-y-4" data-pagefind-weight="0.5">${cards}</ul>` : '<p class="mt-8 bg-white border border-slate-200 rounded-3xl p-6 text-slate-600">No articles are filed in this category yet. Check back soon.</p>'}
   ${pagination}
 </main>`
   return shell(title, head, body)
@@ -282,10 +289,11 @@ export function renderCategoryIndex(counts: Record<ArchiveCategory, number>): st
 <link rel="canonical" href="${SITE}/category/">
 ${crumbs.jsonLd}`
   const cards = ARCHIVE_CATEGORIES.map((c) => `<li><a href="${categoryPath(c)}" class="group block h-full bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 transition">
-      <div class="flex items-baseline justify-between gap-3"><h2 class="text-lg font-semibold group-hover:text-blue-800">${escape(CATEGORY_LABELS[c])}</h2><span class="text-xs font-mono text-slate-500">${counts[c]} ${counts[c] === 1 ? 'article' : 'articles'}</span></div>
+      <div class="flex items-baseline justify-between gap-3"><h2 class="text-lg font-semibold group-hover:text-blue-800">${escape(CATEGORY_LABELS[c])}</h2><span class="text-xs font-mono text-slate-500" data-pagefind-ignore>${counts[c]} ${counts[c] === 1 ? 'article' : 'articles'}</span></div>
       <p class="mt-2 text-sm leading-6 text-slate-600">${escape(CATEGORY_DESCRIPTIONS[c])}</p>
     </a></li>`).join('\n')
-  const body = `<main class="max-w-4xl mx-auto px-6 py-12">
+  const body = `<main class="max-w-4xl mx-auto px-6 py-12" data-pagefind-body>
+  <span hidden data-pagefind-filter="type:Category page"></span>
   ${crumbs.html}
   <h1 class="heading-serif text-4xl text-slate-950">Categories</h1>
   <p class="mt-3 text-slate-600">Every story on Media Law News is automatically filed into one or more of these archives.</p>
@@ -328,7 +336,7 @@ ${crumbs.jsonLd}`
           <time class="font-mono" datetime="${a.publishedAt.toISOString()}">${shortDate(a.publishedAt)}</time>
         </div>
         <h2 class="mt-2 text-lg font-semibold leading-snug"><a href="${escape(articlePath(a))}" class="hover:text-blue-800">${escape(a.title)}</a></h2>
-        <div class="mt-3 flex flex-wrap items-center gap-2"><span class="sr-only">Categories:</span>${categoryChips(archiveCategories(a))}</div>
+        <div class="mt-3 flex flex-wrap items-center gap-2" data-pagefind-ignore><span class="sr-only">Categories:</span>${categoryChips(archiveCategories(a))}</div>
       </article>
     </li>`).join('\n')
 
@@ -336,7 +344,7 @@ ${crumbs.jsonLd}`
   const disabled = (html: string) => `<span aria-disabled="true" class="inline-flex items-center gap-x-2 px-4 py-2 rounded-2xl border border-slate-100 bg-slate-50 text-sm font-semibold text-slate-300">${html}</span>`
   const prevHtml = '<i class="fa-solid fa-arrow-left text-xs"></i> Previous'
   const nextHtml = 'Next <i class="fa-solid fa-arrow-right text-xs"></i>'
-  const pagination = totalPages > 1 ? `<nav class="mt-10 flex items-center justify-between gap-4" aria-label="Pagination">
+  const pagination = totalPages > 1 ? `<nav class="mt-10 flex items-center justify-between gap-4" aria-label="Pagination" data-pagefind-ignore>
     ${page > 1 ? navLink(page - 1, prevHtml, 'prev') : disabled(prevHtml)}
     <span class="text-sm text-slate-500">Page ${page} of ${totalPages}</span>
     ${page < totalPages ? navLink(page + 1, nextHtml, 'next') : disabled(nextHtml)}
@@ -345,15 +353,16 @@ ${crumbs.jsonLd}`
   const first = total ? (page - 1) * perPage + 1 : 0
   const last = first ? first + articles.length - 1 : 0
 
-  const body = `<main class="max-w-4xl mx-auto px-6 py-12">
+  const body = `<main class="max-w-4xl mx-auto px-6 py-12" data-pagefind-body>
+  <span hidden data-pagefind-filter="type:Archive page"></span>
   ${crumbs.html}
   <header>
     <p class="text-xs font-semibold tracking-widest text-blue-700 uppercase">Archive</p>
     <h1 class="heading-serif mt-2 text-4xl text-slate-950">News Archive</h1>
     <p class="mt-3 text-slate-600 leading-7">Every story on Media Law News, newest first. Browse by topic on the <a href="/category/" class="text-blue-800 underline underline-offset-2">category pages</a>.</p>
-    <p class="mt-2 text-sm text-slate-500">${total ? `Showing ${first}–${last} of ${total} ${total === 1 ? 'article' : 'articles'} · Page ${page} of ${totalPages}` : 'No articles yet'}</p>
+    <p class="mt-2 text-sm text-slate-500" data-pagefind-ignore>${total ? `Showing ${first}–${last} of ${total} ${total === 1 ? 'article' : 'articles'} · Page ${page} of ${totalPages}` : 'No articles yet'}</p>
   </header>
-  ${rows ? `<ol class="mt-8 space-y-3">${rows}</ol>` : '<p class="mt-8 bg-white border border-slate-200 rounded-3xl p-6 text-slate-600">No articles have been archived yet. Check back soon.</p>'}
+  ${rows ? `<ol class="mt-8 space-y-3" data-pagefind-weight="0.5">${rows}</ol>` : '<p class="mt-8 bg-white border border-slate-200 rounded-3xl p-6 text-slate-600">No articles have been archived yet. Check back soon.</p>'}
   ${pagination}
 </main>`
   return shell(title, head, body)
