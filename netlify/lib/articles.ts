@@ -41,6 +41,11 @@ const FEED_TOPICS: Record<string, Topic> = {
   'https://www.insideprivacy.com/feed/': 'defamation-privacy',
   'https://eyeonprivacy.sheppardmullinplatform.com/feed/': 'defamation-privacy',
   'https://www.mandellpc.com/news': 'media-law',
+  'https://www.courthousenews.com/feed/': 'media-law',
+  'https://www.courthousenews.com/category/media/feed/': 'media-law',
+  'https://www.courthousenews.com/category/entertainment/feed/': 'entertainment',
+  'https://www.courthousenews.com/category/civil-rights/feed/': 'first-amendment',
+  'https://www.courthousenews.com/category/appeals/feed/': 'media-law',
 }
 
 export function classifyTopic(text: string, fallback: Topic): Topic {
