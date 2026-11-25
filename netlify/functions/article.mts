@@ -1,22 +1,32 @@
-import type { Config } from '@netlify/functions'
-import { findArticle, articlePage, readArchivedArticles, archiveSnapshot } from '../lib/articles.ts'
-import { readSnapshot } from '../lib/feeds.ts'
+import type { Config, Context } from '@netlify/functions'
+import { articlePath, findArticle, findArticleBySourceUrl, legacySourceUrl, relatedArticles } from '../lib/articles.ts'
+import { renderArticlePage, renderNotFoundPage } from '../lib/article-page.ts'
 
-export default async (request: Request) => {
-  const url = new URL(request.url)
-  const match = url.pathname.match(/^\/articles\/(\d{4})\/([^/]+)\.html$/)
-  if (!match) return new Response('Not found', { status: 404 })
+// Serves the permanent page for each article: /articles/YYYY/slug.html
+export default async (_request: Request, context: Context) => {
+  const { year, slug } = context.params
+  const notFound = () =>
+    new Response(renderNotFoundPage(), { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+  if (!/^\d{4}$/.test(year) || !/^[a-z0-9-]{1,120}$/.test(slug)) return notFound()
 
-  let records = await readArchivedArticles().catch(() => [])
-  if (!records.length) {
-    const snapshot = await readSnapshot().catch(() => null)
-    if (snapshot) records = await archiveSnapshot(snapshot).catch(() => [])
+  const article = await findArticle(year, slug)
+  if (!article) {
+    // URLs from the first permalink version redirect to the current address.
+    const sourceUrl = await legacySourceUrl(year, slug)
+    const moved = sourceUrl ? await findArticleBySourceUrl(sourceUrl) : undefined
+    if (moved) return new Response(null, { status: 301, headers: { Location: articlePath(moved) } })
+    return notFound()
   }
-  const article = findArticle(records, match[1], match[2])
-  if (!article) return new Response('Article not found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
 
-  const related = records.filter((candidate) => candidate.categories.some((category) => article.categories.includes(category)))
-  return articlePage(article, related)
+  const related = await relatedArticles(article)
+  return new Response(renderArticlePage(article, related), {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=300',
+      // Article content never changes, but related stories do; cache at the CDN for an hour.
+      'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=3600, stale-while-revalidate=86400',
+    },
+  })
 }
 
 export const config: Config = {
