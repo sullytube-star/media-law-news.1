@@ -1,4 +1,4 @@
-import { articlePath, archiveCategories, primaryCategory, ARCHIVE_CATEGORIES, CATEGORY_DESCRIPTIONS, CATEGORY_LABELS, TOPIC_LABELS, type ArchiveCategory, type Article, type CategoryPage, type Topic } from './articles.ts'
+import { articlePath, archiveCategories, withInternetSocialTag, primaryCategory, ARCHIVE_CATEGORIES, CATEGORY_DESCRIPTIONS, CATEGORY_LABELS, TOPIC_LABELS, type ArchiveCategory, type Article, type CategoryPage, type Topic } from './articles.ts'
 
 const SITE = 'https://medialawnews.com'
 
@@ -132,7 +132,7 @@ export function renderArticlePage(article: Article, related: Article[]): string 
   const crumbs = breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Categories', path: '/category/' }, { name: CATEGORY_LABELS[primary], path: categoryPath(primary) }, { name: article.title }])
   const categoryLinks = `<nav class="mt-6 flex flex-wrap items-center gap-2" aria-label="Article categories"><span class="text-xs font-semibold tracking-widest text-slate-500 uppercase mr-1">Filed under</span>${categoryChips(archiveCategories(article), undefined, true)}</nav>`
   const archiveSlugs = new Set<string>(ARCHIVE_CATEGORIES)
-  const freeTags = article.categories.filter((t) => !archiveSlugs.has(t))
+  const freeTags = withInternetSocialTag(article.title, article.summary, article.categories).filter((t) => !archiveSlugs.has(t))
   const published = article.publishedAt
   // Pages are written once and never edited, so the last modification is when the
   // page was created (never earlier than the publication date).

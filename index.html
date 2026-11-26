@@ -233,7 +233,7 @@
                 <button onclick="filterNews('media-law')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="media-law">Media Law</button>
                 <button onclick="filterNews('entertainment')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="entertainment">Entertainment Law</button>
                 <button onclick="filterNews('copyright-fair-use')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="copyright-fair-use">Copyright &amp; Fair Use Law</button>
-                <button onclick="filterNews('defamation-privacy')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="defamation-privacy">Defamation &amp; Privacy</button>
+                <button onclick="filterNews('defamation-privacy')" class="filter-btn px-5 py-1.5 text-sm font-medium rounded-3xl transition-all" data-filter="defamation-privacy">Defamation, Libel &amp; Privacy</button>
             </div>
         </div>
 
@@ -414,7 +414,7 @@
                         <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> Media Law</label>
                         <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> Entertainment Law</label>
                         <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" checked class="accent-blue-900"> Copyright &amp; Fair Use Law</label>
-                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" class="accent-blue-900"> Defamation &amp; Privacy</label>
+                        <label class="flex items-center gap-x-2 text-sm border rounded-2xl px-3 py-1 cursor-pointer"><input type="checkbox" class="accent-blue-900"> Defamation, Libel &amp; Privacy</label>
                     </div>
                 </div>
                 
@@ -441,6 +441,7 @@
             { url: 'https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/topic/subject/first-amendment-us-constitution/rss.xml', source: 'New York Times · First Amendment', category: 'first-amendment' },
             { url: 'https://www.newsweek.com/topic/first-amendment', source: 'Newsweek · First Amendment', category: 'first-amendment' },
             { url: 'https://www.rcfp.org/feed/', source: 'Reporters Committee (RCFP)', category: 'media-law' },
+            { url: 'https://www.rcfp.org/category/libel-and-privacy/feed/', source: 'RCFP · Libel & Privacy', category: 'defamation-privacy' },
             { url: 'https://www.eff.org/rss/updates.xml', source: 'EFF Deeplinks', category: 'media-law' },
             { url: 'https://deadline.com/category/legal/feed/', source: 'Deadline Legal', category: 'entertainment' },
             { url: 'https://epic.org/feed/', source: 'EPIC', category: 'defamation-privacy' },
@@ -480,14 +481,14 @@
             { url: 'https://www.abajournal.com/news/rss', source: 'ABA Journal', category: 'media-law' },
             { url: 'https://news.bloomberglaw.com/rss/tech-and-telecom-law', source: 'Bloomberg Law · Tech & Telecom', category: 'media-law' }
         ];
-        const FEED_CACHE_KEY = 'media-law-news-live-v17';
+        const FEED_CACHE_KEY = 'media-law-news-live-v18';
         const FEED_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
         const CATEGORY_LABELS = {
             'first-amendment': 'First Amendment',
             'media-law': 'Media Law',
             'entertainment': 'Entertainment Law',
-            'defamation-privacy': 'Defamation & Privacy',
+            'defamation-privacy': 'Defamation, Libel & Privacy',
             'copyright-fair-use': 'Copyright & Fair Use Law'
         };
 
@@ -531,12 +532,12 @@
                 id: 4,
                 title: "TikTok Ban Law Survives First Amendment Challenge",
                 date: "2025-01-17",
-                category: "first-amendment",
-                categoryLabel: "First Amendment",
+                category: "media-law",
+                categoryLabel: "Media Law",
                 summary: "TikTok v. Garland: Supreme Court rejected claims that the law forcing divestiture or ban of TikTok violated the platform’s and users’ free speech rights.",
                 source: "Knight First Amendment Institute",
                 link: "https://knightcolumbia.org/",
-                tags: ["Social Media", "National Security", "Platform Speech"]
+                tags: ["Internet & Social Media Law", "Social Media", "National Security", "Platform Speech"]
             },
             {
                 id: 5,
@@ -630,10 +631,19 @@
             return text.length > max ? text.slice(0, max).replace(/\s+\S*$/, '') + '…' : text;
         }
 
+        // Internet and social media law stories are tagged and filed under Media Law.
+        const INTERNET_SOCIAL = /(internet law|social media|social network|section 230|content moderation|online (speech|platforms?|harassment|safety)|platform liability|\binternet\b|tiktok|facebook|instagram|youtube|twitter|\bx corp|meta platforms|influencer)/i;
+        const INTERNET_SOCIAL_TAG = 'Internet & Social Media Law';
+
+        function withInternetSocialTag(text, tags) {
+            return INTERNET_SOCIAL.test(text) && !tags.includes(INTERNET_SOCIAL_TAG) ? [INTERNET_SOCIAL_TAG, ...tags] : tags;
+        }
+
         // Refine the feed's default category using simple keyword matching
         function classifyItem(text, fallback) {
             const t = text.toLowerCase();
             if (/(defamation|libel|slander|privacy|reputation|anti-slapp|false light|intrusion|public disclosure)/.test(t)) return 'defamation-privacy';
+            if (INTERNET_SOCIAL.test(t)) return 'media-law';
             if (/(copyright|fair use|\bdmca\b|section 512|piracy|pirated|public domain|transformative use|digital millennium)/.test(t)) return 'copyright-fair-use';
             if (/(copyright|trademark|music|film|studio|streaming|hollywood|entertainment|royalt|licens|talent|celebrit)/.test(t)) return 'entertainment';
             if (/(defamation|libel|journalist|reporter|press freedom|newsroom|subpoena|foia|public records|privacy|section 230)/.test(t)) return 'media-law';
@@ -655,7 +665,7 @@
                     source: feed.source,
                     link: item.link,
                     permalink: item.permalink || null,
-                    tags: (item.categories || []).slice(0, 5).map(stripHTML).filter(Boolean),
+                    tags: withInternetSocialTag(`${title} ${summary} ${(item.categories || []).join(' ')}`, (item.categories || []).slice(0, 5).map(stripHTML).filter(Boolean)),
                     live: true
                 };
             });

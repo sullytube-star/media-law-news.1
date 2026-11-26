@@ -59,6 +59,10 @@
                     <input type="checkbox" value="copyright-fair-use" checked>
                     <span>Copyright &amp; Fair Use Law</span>
                 </label>
+                <label class="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                    <input type="checkbox" value="defamation-privacy" checked>
+                    <span>Defamation, Libel &amp; Privacy</span>
+                </label>
             </div>
 
             <div class="mt-6 flex flex-wrap gap-3">
@@ -97,6 +101,7 @@
 
         function normalizeCategory(value) {
             const text = (value || '').toLowerCase();
+            if (/defamation|libel|privacy/.test(text)) return 'Defamation, Libel & Privacy';
             if (text.includes('first')) return 'First Amendment';
             if (text.includes('media')) return 'Media Law';
             if (text.includes('entertainment')) return 'Entertainment Law';
@@ -125,8 +130,9 @@
 
         function currentDigestItems() {
             const selected = getSelectedTopics();
-            const sourceList = selected.length ? selected : ['first-amendment', 'media-law', 'entertainment', 'copyright-fair-use'];
-            return latestStories.filter(item => sourceList.some(topic => item.category.toLowerCase().includes(topic === 'copyright-fair-use' ? 'copyright' : topic.replace('-', ' '))));
+            const sourceList = selected.length ? selected : ['first-amendment', 'media-law', 'entertainment', 'copyright-fair-use', 'defamation-privacy'];
+            const keyword = { 'copyright-fair-use': 'copyright', 'defamation-privacy': 'defamation' };
+            return latestStories.filter(item => sourceList.some(topic => item.category.toLowerCase().includes(keyword[topic] || topic.replace('-', ' '))));
         }
 
         function renderDigest() {

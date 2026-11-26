@@ -54,7 +54,7 @@ export const CURATED_STORIES: CuratedStory[] = [
   {
     "title": "TikTok Ban Law Survives First Amendment Challenge",
     "date": "2025-01-17",
-    "category": "first-amendment",
+    "category": "media-law",
     "summary": "TikTok v. Garland: Supreme Court rejected claims that the law forcing divestiture or ban of TikTok violated the platform’s and users’ free speech rights.",
     "source": "Knight First Amendment Institute",
     "link": "https://knightcolumbia.org/",
