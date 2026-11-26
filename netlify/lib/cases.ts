@@ -23,7 +23,7 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   'first-amendment': 'First Amendment',
   'media-law': 'Media Law',
   entertainment: 'Entertainment Law',
-  'defamation-privacy': 'Defamation & Privacy',
+  'defamation-privacy': 'Defamation, Libel & Privacy',
 }
 
 const COURTS = ['scotus', 'ca1', 'ca2', 'ca3', 'ca4', 'ca5', 'ca6', 'ca7', 'ca8', 'ca9', 'ca10', 'ca11', 'cadc', 'cafc']

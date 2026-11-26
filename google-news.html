@@ -41,7 +41,7 @@
     <h1 class="mt-2 text-4xl font-bold mb-3">Today's Top 100</h1>
     <p class="text-slate-600 mb-6 max-w-3xl">
         Up to 100 stories from the past 24 hours, pulled from Google News once a day across
-        First Amendment, media law, entertainment law, defamation and privacy.
+        First Amendment, media law, entertainment law, defamation, libel and privacy.
     </p>
 
     <div class="bg-white rounded-xl shadow-sm border p-6">
@@ -59,7 +59,7 @@
                     <option>Media Law</option>
                     <option>Entertainment Law</option>
                     <option>Copyright &amp; Fair Use Law</option>
-                    <option>Defamation</option>
+                    <option>Defamation &amp; Libel</option>
                     <option>Privacy</option>
                 </select>
             </div>
@@ -180,6 +180,10 @@ async function load(day) {
     const res = await fetch('/api/google-news' + (day ? `?date=${encodeURIComponent(day)}` : ''));
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     snapshot = await res.json();
+    // Days pulled before the topic was renamed list it as "Defamation".
+    const rename = t => (t === 'Defamation' ? 'Defamation & Libel' : t);
+    snapshot.items = (snapshot.items || []).map(item => ({ ...item, topics: (item.topics || []).map(rename) }));
+    snapshot.counts = Object.fromEntries(Object.entries(snapshot.counts || {}).map(([t, n]) => [rename(t), n]));
     render();
   } catch {
     snapshot = null;

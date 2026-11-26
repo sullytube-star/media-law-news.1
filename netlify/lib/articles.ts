@@ -16,7 +16,7 @@ export const CATEGORY_LABELS: Record<ArchiveCategory, string> = {
   'entertainment-law': 'Entertainment Law',
   'copyright-fair-use': 'Copyright & Fair Use Law',
   privacy: 'Privacy',
-  defamation: 'Defamation',
+  defamation: 'Defamation & Libel',
   journalism: 'Journalism',
   'technology-law': 'Technology Law',
   scotus: 'SCOTUS',
@@ -28,7 +28,7 @@ export const TOPIC_LABELS: Record<Topic, string> = {
   'first-amendment': 'First Amendment',
   'media-law': 'Media Law',
   entertainment: 'Entertainment Law',
-  'defamation-privacy': 'Defamation & Privacy',
+  'defamation-privacy': 'Defamation, Libel & Privacy',
   'copyright-fair-use': 'Copyright & Fair Use Law',
 }
 
@@ -38,6 +38,7 @@ const FEED_TOPICS: Record<string, Topic> = {
   'https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/topic/subject/first-amendment-us-constitution/rss.xml': 'first-amendment',
   'https://www.newsweek.com/topic/first-amendment': 'first-amendment',
   'https://www.rcfp.org/feed/': 'media-law',
+  'https://www.rcfp.org/category/libel-and-privacy/feed/': 'defamation-privacy',
   'https://www.eff.org/rss/updates.xml': 'media-law',
   'https://epic.org/feed/': 'defamation-privacy',
   'https://www.insideprivacy.com/feed/': 'defamation-privacy',
@@ -59,14 +60,24 @@ const FEED_TOPICS: Record<string, Topic> = {
   'https://www.cahill.com/news': 'first-amendment',
   'https://www.duanemorris.com/resources/data/publicationlistings_ALLSHORT.json': 'media-law',
   'https://www.billboard.com/c/business/legal/feed/': 'entertainment',
+  'https://www.internetandtechnologylaw.com/feed/': 'media-law',
+  'https://www.law.com/topics/social-media/feed/': 'media-law',
+  'https://www.jurist.org/news/feed/': 'media-law',
+  'https://www.abajournal.com/news/rss': 'media-law',
+  'https://news.bloomberglaw.com/rss/tech-and-telecom-law': 'media-law',
 }
 
 // Copyright, fair use and related infringement / licensing disputes.
+// Internet and social media law stories. They are tagged and filed under Media Law.
+export const INTERNET_SOCIAL = /(internet law|social media|social network|section 230|content moderation|online (speech|platforms?|harassment|safety)|platform liability|\binternet\b|tiktok|facebook|instagram|youtube|twitter|\bx corp|meta platforms|influencer)/i
+export const INTERNET_SOCIAL_TAG = 'Internet & Social Media Law'
+
 const COPYRIGHT = /(copyright|fair use|\bdmca\b|section 512|piracy|pirated|public domain|transformative use|digital millennium)/i
 
 export function classifyTopic(text: string, fallback: Topic): Topic {
   const t = text.toLowerCase()
   if (/(defamation|libel|slander|privacy|reputation|anti-slapp|false light|intrusion|public disclosure)/.test(t)) return 'defamation-privacy'
+  if (INTERNET_SOCIAL.test(t)) return 'media-law'
   if (COPYRIGHT.test(t)) return 'copyright-fair-use'
   if (/(copyright|trademark|music|film|studio|streaming|hollywood|entertainment|royalt|licens|talent|celebrit)/.test(t)) return 'entertainment'
   if (/(journalist|reporter|press freedom|newsroom|subpoena|foia|public records|section 230)/.test(t)) return 'media-law'
@@ -75,12 +86,12 @@ export function classifyTopic(text: string, fallback: Topic): Topic {
 }
 
 export const CATEGORY_DESCRIPTIONS: Record<ArchiveCategory, string> = {
-  'media-law': 'Legal developments affecting publishers, broadcasters, platforms and the news business.',
+  'media-law': 'Legal developments affecting publishers, broadcasters, platforms and the news business, including internet and social media law.',
   'first-amendment': 'Free speech, free press, censorship and prior-restraint cases and commentary.',
   'entertainment-law': 'Copyright, trademark, right of publicity, licensing and disputes across film, music and streaming.',
   'copyright-fair-use': 'Copyright infringement, fair use, the DMCA, AI training disputes, licensing and the public domain.',
   privacy: 'Data protection, surveillance, biometrics and the privacy torts.',
-  defamation: 'Libel, slander, false light and anti-SLAPP litigation.',
+  defamation: 'Defamation and libel: slander, false light and anti-SLAPP litigation.',
   journalism: 'Press freedom, newsgathering, shield laws, subpoenas, reporters\' rights, internet law and social media law.',
   'technology-law': 'Section 230, AI, social media, platform regulation and internet law.',
   scotus: 'U.S. Supreme Court cases, arguments and opinions touching media and speech.',
@@ -105,6 +116,7 @@ const ARCHIVE_RULES: [ArchiveCategory, RegExp][] = [
   ['defamation', /(defamation|defamatory|libel|slander|false light|anti-slapp)/i],
   ['journalism', /(journalis|reporters?\b|newsroom|news media|press freedom|freedom of the press|newsgathering|shield law|news organi[sz]ation|foia|public records|internet law|social media|section 230|online (speech|platforms?|publish\w*|safety)|content moderation|platform liability)/i],
   ['technology-law', /(\btechnology|tech compan|artificial intelligence|\bai\b|generative|social media|section 230|\binternet\b|online platform|algorithm|data breach|deepfake|tiktok|meta platforms|youtube|\bx corp)/i],
+  ['media-law', INTERNET_SOCIAL],
   ['media-law', /(media law|media compan|news organi[sz]ation|journalis|\bpress\b|broadcast|\bpublishers?\b|newspaper|\bfcc\b)/i],
 ]
 
@@ -164,11 +176,17 @@ function toDate(value: string, fallback: Date): Date {
   return Number.isNaN(parsed.getTime()) ? fallback : parsed
 }
 
+// Adds the "Internet & Social Media Law" tag to stories about internet or social media law.
+export function withInternetSocialTag(title: string, summary: string, tags: string[]): string[] {
+  if (tags.includes(INTERNET_SOCIAL_TAG)) return tags
+  return INTERNET_SOCIAL.test(`${title} ${summary.slice(0, 600)} ${tags.join(' ')}`) ? [...tags, INTERNET_SOCIAL_TAG] : tags
+}
+
 export function candidatesFromSnapshot(snapshot: Snapshot): Candidate[] {
   const now = new Date()
   return snapshot.feeds.flatMap((feed) => feed.items.map((item) => {
     const topic = classifyTopic(`${item.title} ${item.description.slice(0, 320)} ${item.categories.join(' ')}`, FEED_TOPICS[feed.url] ?? 'entertainment')
-    const candidate = { title: item.title, summary: item.description, source: feed.source, topic, categories: item.categories.slice(0, 8) }
+    const candidate = { title: item.title, summary: item.description, source: feed.source, topic, categories: withInternetSocialTag(item.title, item.description, item.categories.slice(0, 8)) }
     return {
       sourceUrl: item.link, ...candidate,
       categories: [...candidate.categories, ...archiveCategories(candidate)],
@@ -180,7 +198,7 @@ export function candidatesFromSnapshot(snapshot: Snapshot): Candidate[] {
 export function curatedCandidates(): Candidate[] {
   return CURATED_STORIES.map((story) => {
     const topic = story.category as Topic
-    const candidate = { title: story.title, summary: story.summary, source: story.source, topic, categories: story.tags }
+    const candidate = { title: story.title, summary: story.summary, source: story.source, topic, categories: withInternetSocialTag(story.title, story.summary, story.tags) }
     return {
       sourceUrl: story.link, ...candidate,
       categories: [...candidate.categories, ...archiveCategories(candidate)],

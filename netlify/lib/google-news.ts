@@ -5,7 +5,7 @@ import { XMLParser } from 'fast-xml-parser'
 // Each topic runs one or more Google News RSS searches limited to the last
 // 24 hours; the results are merged, de-duplicated and capped at MAX_RESULTS.
 
-export type Topic = 'First Amendment' | 'Media Law' | 'Entertainment Law' | 'Copyright & Fair Use Law' | 'Defamation' | 'Privacy'
+export type Topic = 'First Amendment' | 'Media Law' | 'Entertainment Law' | 'Copyright & Fair Use Law' | 'Defamation & Libel' | 'Privacy'
 
 export const TOPIC_QUERIES: { topic: Topic; queries: string[] }[] = [
   {
@@ -38,8 +38,8 @@ export const TOPIC_QUERIES: { topic: Topic; queries: string[] }[] = [
     ],
   },
   {
-    topic: 'Defamation',
-    queries: ['defamation OR libel OR slander'],
+    topic: 'Defamation & Libel',
+    queries: ['defamation OR libel OR slander', '(libel OR defamation) (lawsuit OR suit OR verdict OR ruling OR "actual malice" OR "anti-SLAPP")'],
   },
   {
     topic: 'Privacy',

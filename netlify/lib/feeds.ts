@@ -33,6 +33,8 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?
   // Newsweek has no RSS feed for its topic pages, so the page is scraped.
   { url: 'https://www.newsweek.com/topic/first-amendment', source: 'Newsweek · First Amendment', format: 'newsweek-topic' },
   { url: 'https://www.rcfp.org/feed/', source: 'Reporters Committee (RCFP)' },
+  // RCFP's Libel and privacy category (rcfp.org/category/libel-and-privacy/).
+  { url: 'https://www.rcfp.org/category/libel-and-privacy/feed/', source: 'RCFP · Libel & Privacy' },
   { url: 'https://www.eff.org/rss/updates.xml', source: 'EFF Deeplinks' },
   { url: 'https://deadline.com/category/legal/feed/', source: 'Deadline Legal' },
   { url: 'https://epic.org/feed/', source: 'EPIC' },
