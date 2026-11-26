@@ -75,8 +75,6 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?
   { url: 'https://www.forbes.com/innovation/feed/', source: 'Forbes', onTopic: true },
   // TMZ's Legal category feed: celebrity lawsuits, trials and court filings.
   { url: 'https://www.tmz.com/category/legal/rss.xml', source: 'TMZ Legal' },
-  // TheWrap has only a site-wide feed (no legal category feed), so it is filtered to on-topic stories.
-  { url: 'https://www.thewrap.com/feed/', source: 'TheWrap', onTopic: true },
   // Law firm news and insights. These firms publish on every practice area,
   // so each is filtered to stories on the site's beat.
   // Davis Wright Tremaine insights listing (no RSS); the page embeds its results as JSON.
