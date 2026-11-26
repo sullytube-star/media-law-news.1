@@ -48,6 +48,7 @@ default|NEWS
 media-law|MEDIA LAW
 first-amendment|FIRST AMENDMENT
 entertainment-law|ENTERTAINMENT LAW
+copyright-fair-use|COPYRIGHT &amp; FAIR USE LAW
 privacy|PRIVACY
 defamation|DEFAMATION
 journalism|JOURNALISM

@@ -2,7 +2,7 @@ import type { Config } from '@netlify/functions'
 import { refreshGoogleNews } from '../lib/google-news.ts'
 
 // Pulls the day's Google News results (up to 100 stories across First
-// Amendment, media law, entertainment law, defamation and privacy) once a day.
+// Amendment, media law, entertainment law, copyright and fair use, defamation and privacy) once a day.
 export default async () => {
   const snapshot = await refreshGoogleNews()
   console.log(

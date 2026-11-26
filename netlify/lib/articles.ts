@@ -7,13 +7,14 @@ import { CURATED_STORIES } from './curated.ts'
 
 // Permanent article pages. Existing year/slug assignments are immutable.
 export type Article = typeof articles.$inferSelect
-export type Topic = 'first-amendment' | 'media-law' | 'entertainment' | 'defamation-privacy'
-export type ArchiveCategory = 'media-law' | 'first-amendment' | 'entertainment-law' | 'privacy' | 'defamation' | 'journalism' | 'technology-law' | 'scotus'
+export type Topic = 'first-amendment' | 'media-law' | 'entertainment' | 'defamation-privacy' | 'copyright-fair-use'
+export type ArchiveCategory = 'media-law' | 'first-amendment' | 'entertainment-law' | 'copyright-fair-use' | 'privacy' | 'defamation' | 'journalism' | 'technology-law' | 'scotus'
 
 export const CATEGORY_LABELS: Record<ArchiveCategory, string> = {
   'media-law': 'Media Law',
   'first-amendment': 'First Amendment',
   'entertainment-law': 'Entertainment Law',
+  'copyright-fair-use': 'Copyright & Fair Use Law',
   privacy: 'Privacy',
   defamation: 'Defamation',
   journalism: 'Journalism',
@@ -28,6 +29,7 @@ export const TOPIC_LABELS: Record<Topic, string> = {
   'media-law': 'Media Law',
   entertainment: 'Entertainment Law',
   'defamation-privacy': 'Defamation & Privacy',
+  'copyright-fair-use': 'Copyright & Fair Use Law',
 }
 
 const FEED_TOPICS: Record<string, Topic> = {
@@ -62,9 +64,13 @@ const FEED_TOPICS: Record<string, Topic> = {
   'https://www.billboard.com/c/business/legal/feed/': 'entertainment',
 }
 
+// Copyright, fair use and related infringement / licensing disputes.
+const COPYRIGHT = /(copyright|fair use|\bdmca\b|section 512|piracy|pirated|public domain|transformative use|digital millennium)/i
+
 export function classifyTopic(text: string, fallback: Topic): Topic {
   const t = text.toLowerCase()
   if (/(defamation|libel|slander|privacy|reputation|anti-slapp|false light|intrusion|public disclosure)/.test(t)) return 'defamation-privacy'
+  if (COPYRIGHT.test(t)) return 'copyright-fair-use'
   if (/(copyright|trademark|music|film|studio|streaming|hollywood|entertainment|royalt|licens|talent|celebrit)/.test(t)) return 'entertainment'
   if (/(journalist|reporter|press freedom|newsroom|subpoena|foia|public records|section 230)/.test(t)) return 'media-law'
   if (/(first amendment|free speech|free expression|censorship|protest|religious liberty|book ban)/.test(t)) return 'first-amendment'
@@ -75,6 +81,7 @@ export const CATEGORY_DESCRIPTIONS: Record<ArchiveCategory, string> = {
   'media-law': 'Legal developments affecting publishers, broadcasters, platforms and the news business.',
   'first-amendment': 'Free speech, free press, censorship and prior-restraint cases and commentary.',
   'entertainment-law': 'Copyright, trademark, right of publicity, licensing and disputes across film, music and streaming.',
+  'copyright-fair-use': 'Copyright infringement, fair use, the DMCA, AI training disputes, licensing and the public domain.',
   privacy: 'Data protection, surveillance, biometrics and the privacy torts.',
   defamation: 'Libel, slander, false light and anti-SLAPP litigation.',
   journalism: 'Press freedom, newsgathering, shield laws, subpoenas and reporters\' rights.',
@@ -96,6 +103,7 @@ function mentionsScotus(text: string): boolean {
 const ARCHIVE_RULES: [ArchiveCategory, RegExp][] = [
   ['first-amendment', /(first amendment|free speech|free expression|freedom of (speech|the press|expression)|censorship|censor(ed|s)?\b|prior restraint|book ban)/i],
   ['entertainment-law', /(entertainment|copyright|trademark|music (industry|label|publisher)|\bfilm|hollywood|streaming|right of publicity|royalt|record label|\bstudio)/i],
+  ['copyright-fair-use', COPYRIGHT],
   ['privacy', /(privacy|data protection|surveillance|personal data|biometric|facial recognition|gdpr|ccpa|wiretap)/i],
   ['defamation', /(defamation|defamatory|libel|slander|false light|anti-slapp)/i],
   ['journalism', /(journalis|reporters?\b|newsroom|news media|press freedom|freedom of the press|newsgathering|shield law|news organi[sz]ation|foia|public records)/i],
@@ -108,6 +116,7 @@ const TOPIC_CATEGORY: Record<Topic, ArchiveCategory> = {
   'media-law': 'media-law',
   entertainment: 'entertainment-law',
   'defamation-privacy': 'privacy',
+  'copyright-fair-use': 'copyright-fair-use',
 }
 
 type Categorizable = Pick<Article, 'title' | 'summary' | 'source' | 'topic' | 'categories'>
@@ -130,7 +139,7 @@ export function archiveCategories(article: Categorizable): ArchiveCategory[] {
 export function primaryCategory(article: Categorizable): ArchiveCategory {
   const cats = archiveCategories(article)
   const topicCat = TOPIC_CATEGORY[article.topic as Topic]
-  const priority: ArchiveCategory[] = ['scotus', 'defamation', 'privacy', 'first-amendment', 'entertainment-law', 'technology-law', 'journalism', 'media-law']
+  const priority: ArchiveCategory[] = ['scotus', 'defamation', 'privacy', 'first-amendment', 'copyright-fair-use', 'entertainment-law', 'technology-law', 'journalism', 'media-law']
   if (topicCat && cats.includes(topicCat) && topicCat !== 'media-law') return topicCat
   return priority.find((c) => cats.includes(c)) || 'media-law'
 }

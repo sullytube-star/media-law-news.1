@@ -22,6 +22,7 @@ const TOPIC_COLORS: Record<Topic, string> = {
   'media-law': 'bg-amber-100 text-amber-700',
   entertainment: 'bg-emerald-100 text-emerald-700',
   'defamation-privacy': 'bg-rose-100 text-rose-700',
+  'copyright-fair-use': 'bg-sky-100 text-sky-700',
 }
 
 function escape(value: string): string {
@@ -318,12 +319,12 @@ ${crumbs.jsonLd}`
 
 export function renderCategoryIndex(counts: Record<ArchiveCategory, number>): string {
   const crumbs = breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Categories' }])
-  const head = `<meta name="description" content="Browse Media Law News coverage by category: media law, First Amendment, entertainment law, privacy, defamation, journalism, technology law and the Supreme Court.">
+  const head = `<meta name="description" content="Browse Media Law News coverage by category: media law, First Amendment, entertainment law, copyright and fair use, privacy, defamation, journalism, technology law and the Supreme Court.">
 <link rel="canonical" href="${SITE}/category/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Media Law News">
 <meta property="og:title" content="Categories | Media Law News">
-<meta property="og:description" content="Browse Media Law News coverage by category: media law, First Amendment, entertainment law, privacy, defamation, journalism, technology law and the Supreme Court.">
+<meta property="og:description" content="Browse Media Law News coverage by category: media law, First Amendment, entertainment law, copyright and fair use, privacy, defamation, journalism, technology law and the Supreme Court.">
 <meta property="og:url" content="${SITE}/category/">
 ${crumbs.jsonLd}`
   const cards = ARCHIVE_CATEGORIES.map((c) => `<li><a href="${categoryPath(c)}" class="group block h-full bg-white border border-slate-200 hover:border-blue-200 rounded-3xl p-6 transition">
@@ -353,7 +354,7 @@ export function renderArchivePage(result: CategoryPage): string {
   if (page > 1) crumbList.push({ name: `Page ${page}` })
   const crumbs = breadcrumbs(crumbList)
   const title = `News Archive${page > 1 ? ` — Page ${page}` : ''} | Media Law News`
-  const description = 'Every story covered by Media Law News, newest first: media law, First Amendment, entertainment law, privacy, defamation, journalism, technology law and Supreme Court news.'
+  const description = 'Every story covered by Media Law News, newest first: media law, First Amendment, entertainment law, copyright and fair use, privacy, defamation, journalism, technology law and Supreme Court news.'
 
   const head = `<meta name="description" content="${escape(description)}">
 <link rel="canonical" href="${SITE}${path}">

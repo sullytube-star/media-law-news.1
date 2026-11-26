@@ -55,6 +55,10 @@
                     <input type="checkbox" value="entertainment" checked>
                     <span>Entertainment Law</span>
                 </label>
+                <label class="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                    <input type="checkbox" value="copyright-fair-use" checked>
+                    <span>Copyright &amp; Fair Use Law</span>
+                </label>
             </div>
 
             <div class="mt-6 flex flex-wrap gap-3">
@@ -96,6 +100,7 @@
             if (text.includes('first')) return 'First Amendment';
             if (text.includes('media')) return 'Media Law';
             if (text.includes('entertainment')) return 'Entertainment Law';
+            if (text.includes('copyright')) return 'Copyright & Fair Use Law';
             return 'News';
         }
 
@@ -120,8 +125,8 @@
 
         function currentDigestItems() {
             const selected = getSelectedTopics();
-            const sourceList = selected.length ? selected : ['first-amendment', 'media-law', 'entertainment'];
-            return latestStories.filter(item => sourceList.some(topic => item.category.toLowerCase().includes(topic.replace('-', ' '))));
+            const sourceList = selected.length ? selected : ['first-amendment', 'media-law', 'entertainment', 'copyright-fair-use'];
+            return latestStories.filter(item => sourceList.some(topic => item.category.toLowerCase().includes(topic === 'copyright-fair-use' ? 'copyright' : topic.replace('-', ' '))));
         }
 
         function renderDigest() {

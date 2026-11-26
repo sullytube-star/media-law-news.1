@@ -1,11 +1,11 @@
 import { getStore } from '@netlify/blobs'
 import { XMLParser } from 'fast-xml-parser'
 
-// Daily Google News search results for the site's five practice areas.
+// Daily Google News search results for the site's six practice areas.
 // Each topic runs one or more Google News RSS searches limited to the last
 // 24 hours; the results are merged, de-duplicated and capped at MAX_RESULTS.
 
-export type Topic = 'First Amendment' | 'Media Law' | 'Entertainment Law' | 'Defamation' | 'Privacy'
+export type Topic = 'First Amendment' | 'Media Law' | 'Entertainment Law' | 'Copyright & Fair Use Law' | 'Defamation' | 'Privacy'
 
 export const TOPIC_QUERIES: { topic: Topic; queries: string[] }[] = [
   {
@@ -26,6 +26,14 @@ export const TOPIC_QUERIES: { topic: Topic; queries: string[] }[] = [
       '"entertainment law" OR "entertainment lawyer" OR "entertainment attorney" OR "entertainment litigation"',
       '(Hollywood OR studio OR streaming OR "record label") (lawsuit OR sued)',
       '(music OR film OR TV) "copyright infringement" lawsuit',
+    ],
+  },
+  {
+    topic: 'Copyright & Fair Use Law',
+    queries: [
+      '"copyright infringement" OR "copyright lawsuit" OR "copyright case" OR "copyright ruling"',
+      '"fair use" (court OR judge OR ruling OR lawsuit OR copyright)',
+      'DMCA OR "Copyright Office" OR "copyright claim" OR "AI training" copyright',
     ],
   },
   {
