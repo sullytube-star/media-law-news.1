@@ -54,6 +54,11 @@ const FEED_TOPICS: Record<string, Topic> = {
   'https://www.forbes.com/innovation/feed/': 'media-law',
   'https://www.tmz.com/category/legal/rss.xml': 'entertainment',
   'https://www.thewrap.com/feed/': 'entertainment',
+  'https://www.dwt.com/insights?islanding=true&searchtype=12&take=25': 'media-law',
+  'https://www.ballardspahr.com/insights': 'media-law',
+  'https://www.gibsondunn.com/feed/?category_name=accolades,firm-news,in-the-media': 'media-law',
+  'https://www.cahill.com/news': 'first-amendment',
+  'https://www.duanemorris.com/resources/data/publicationlistings_ALLSHORT.json': 'media-law',
   'https://www.billboard.com/c/business/legal/feed/': 'entertainment',
 }
 
