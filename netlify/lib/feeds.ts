@@ -20,7 +20,7 @@ type FeedFormat =
 // `onTopic: 'strict'` (used for law-firm news pages) checks only the title and
 // summary, because firm labels such as "In the Media" or "Media Coverage"
 // would otherwise let every item through.
-const ON_TOPIC = /\b(first amendment|free speech|free press|freedom of (the )?press|press freedom|speech|censor\w*|defamation|defam\w+|libel\w*|slander|privacy|surveillance|copyright\w*|trademark\w*|right of publicity|intellectual property|entertainment|music\w*|musician|record label|film\w*|movie\w*|hollywood|studio|streaming|broadcast\w*|television|tv|netflix|disney|journalis\w+|reporters?|newspapers?|news media|media|publish\w*|social media|section 230|book ban\w*|celebrit\w+|actors?|actress|singer|rapper|artists?|sag-aftra|iatse|anti-slapp|foia|public records)\b/i
+const ON_TOPIC = /\b(first amendment|free speech|free press|freedom of (the )?press|press freedom|speech|censor\w*|defamation|defam\w+|libel\w*|slander|privacy|surveillance|copyright\w*|trademark\w*|right of publicity|intellectual property|entertainment|music\w*|musician|record label|film\w*|movie\w*|hollywood|studio|streaming|broadcast\w*|television|tv|netflix|disney|journalis\w+|reporters?|newspapers?|news media|media|publish\w*|social media|social media law|social networks?|internet|internet law|online (speech|safety|platforms?|harassment)|content moderation|platform liability|section 230|tiktok|facebook|instagram|youtube|twitter|x corp|meta platforms|influencers?|deepfakes?|book ban\w*|celebrit\w+|actors?|actress|singer|rapper|artists?|sag-aftra|iatse|anti-slapp|foia|public records)\b/i
 
 // `linkPrefix` keeps only stories whose link starts with that URL, for
 // sections that have no feed of their own but appear in a broader one.
@@ -88,6 +88,13 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?
   { url: 'https://www.loc.gov/rss/copyright/rss.xml', source: 'U.S. Copyright Office · Updates' },
   { url: 'https://www.loc.gov/rss/copyright/fedreg.xml', source: 'U.S. Copyright Office · Federal Register' },
   { url: 'https://www.loc.gov/rss/copyright/legislation.xml', source: 'U.S. Copyright Office · Legislation' },
+  // Internet and social media law sources. JURIST, the ABA Journal and
+  // Bloomberg Law cover all of law, so only their on-topic stories are kept.
+  { url: 'https://www.internetandtechnologylaw.com/feed/', source: 'Internet & Technology Law' },
+  { url: 'https://www.law.com/topics/social-media/feed/', source: 'Law.com · Social Media' },
+  { url: 'https://www.jurist.org/news/feed/', source: 'JURIST', onTopic: true },
+  { url: 'https://www.abajournal.com/news/rss', source: 'ABA Journal', onTopic: true },
+  { url: 'https://news.bloomberglaw.com/rss/tech-and-telecom-law', source: 'Bloomberg Law · Tech & Telecom', onTopic: true },
 ]
 
 const MAX_ITEMS_PER_FEED = 25

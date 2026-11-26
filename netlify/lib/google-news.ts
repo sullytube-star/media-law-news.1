@@ -18,6 +18,7 @@ export const TOPIC_QUERIES: { topic: Topic; queries: string[] }[] = [
       '"media law" OR "press freedom" OR "freedom of the press"',
       '"shield law" OR "prior restraint" OR "media lawsuit" OR "FCC license" OR "broadcast license"',
       '(journalist OR journalists OR "news outlet" OR newsroom) (subpoena OR arrested OR lawsuit OR "press access")',
+      '("internet law" OR "social media law" OR "Section 230" OR "content moderation") (court OR lawsuit OR ruling OR law)',
     ],
   },
   {
