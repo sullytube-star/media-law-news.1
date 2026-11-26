@@ -84,6 +84,10 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?
   { url: 'https://www.cahill.com/news', source: 'Cahill Gordon & Reindel', format: 'cahill-news', onTopic: 'strict' },
   // Duane Morris "Recent News and Publications" page loads this JSON listing.
   { url: 'https://www.duanemorris.com/resources/data/publicationlistings_ALLSHORT.json', source: 'Duane Morris', format: 'duane-morris-pubs', onTopic: 'strict' },
+  // U.S. Copyright Office (Library of Congress) feeds.
+  { url: 'https://www.loc.gov/rss/copyright/rss.xml', source: 'U.S. Copyright Office · Updates' },
+  { url: 'https://www.loc.gov/rss/copyright/fedreg.xml', source: 'U.S. Copyright Office · Federal Register' },
+  { url: 'https://www.loc.gov/rss/copyright/legislation.xml', source: 'U.S. Copyright Office · Legislation' },
 ]
 
 const MAX_ITEMS_PER_FEED = 25
@@ -177,10 +181,13 @@ function parseFeed(xml: string, linkPrefix?: string): FeedItem[] {
 
   let items: FeedItem[]
   if (Array.isArray(rssItems)) {
+    // Items with no date of their own fall back to the channel's build date,
+    // so old undated items are not shown as brand-new.
+    const channelDate = doc?.rss?.channel?.lastBuildDate ?? doc?.rss?.channel?.pubDate
     items = rssItems.map((item: Record<string, unknown>) => ({
       title: plainText(item.title),
       link: textOf(item.link).trim(),
-      pubDate: toIso(item.pubDate ?? item['dc:date']),
+      pubDate: toIso(item.pubDate ?? item['dc:date'] ?? channelDate),
       author: plainText(item['dc:creator'] ?? item.author),
       description: plainText(item.description) || plainText(item['content:encoded']),
       categories: ((item.category as unknown[]) ?? []).map(plainText).filter(Boolean),
