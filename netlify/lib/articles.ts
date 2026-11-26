@@ -81,7 +81,7 @@ export const CATEGORY_DESCRIPTIONS: Record<ArchiveCategory, string> = {
   'copyright-fair-use': 'Copyright infringement, fair use, the DMCA, AI training disputes, licensing and the public domain.',
   privacy: 'Data protection, surveillance, biometrics and the privacy torts.',
   defamation: 'Libel, slander, false light and anti-SLAPP litigation.',
-  journalism: 'Press freedom, newsgathering, shield laws, subpoenas and reporters\' rights.',
+  journalism: 'Press freedom, newsgathering, shield laws, subpoenas, reporters\' rights, internet law and social media law.',
   'technology-law': 'Section 230, AI, social media, platform regulation and internet law.',
   scotus: 'U.S. Supreme Court cases, arguments and opinions touching media and speech.',
 }
@@ -103,7 +103,7 @@ const ARCHIVE_RULES: [ArchiveCategory, RegExp][] = [
   ['copyright-fair-use', COPYRIGHT],
   ['privacy', /(privacy|data protection|surveillance|personal data|biometric|facial recognition|gdpr|ccpa|wiretap)/i],
   ['defamation', /(defamation|defamatory|libel|slander|false light|anti-slapp)/i],
-  ['journalism', /(journalis|reporters?\b|newsroom|news media|press freedom|freedom of the press|newsgathering|shield law|news organi[sz]ation|foia|public records)/i],
+  ['journalism', /(journalis|reporters?\b|newsroom|news media|press freedom|freedom of the press|newsgathering|shield law|news organi[sz]ation|foia|public records|internet law|social media|section 230|online (speech|platforms?|publish\w*|safety)|content moderation|platform liability)/i],
   ['technology-law', /(\btechnology|tech compan|artificial intelligence|\bai\b|generative|social media|section 230|\binternet\b|online platform|algorithm|data breach|deepfake|tiktok|meta platforms|youtube|\bx corp)/i],
   ['media-law', /(media law|media compan|news organi[sz]ation|journalis|\bpress\b|broadcast|\bpublishers?\b|newspaper|\bfcc\b)/i],
 ]
