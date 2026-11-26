@@ -69,10 +69,6 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?
   },
   // New York Times home page feed covers all news, so it is filtered to on-topic stories.
   { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', source: 'New York Times', onTopic: true },
-  // Forbes has no site-wide feed (forbes.com/feed/ is blocked), so its main
-  // Business and Innovation section feeds are used, filtered to on-topic stories.
-  { url: 'https://www.forbes.com/business/feed/', source: 'Forbes', onTopic: true },
-  { url: 'https://www.forbes.com/innovation/feed/', source: 'Forbes', onTopic: true },
   // TMZ's Legal category feed: celebrity lawsuits, trials and court filings.
   { url: 'https://www.tmz.com/category/legal/rss.xml', source: 'TMZ Legal' },
   // Law firm news and insights. These firms publish on every practice area,
