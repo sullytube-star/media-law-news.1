@@ -3,17 +3,28 @@ import { XMLParser } from 'fast-xml-parser'
 
 // Every feed the site is allowed to load. The pages pick the feeds they need
 // from the cached snapshot by URL.
-// `format: 'mandell-html'` and `format: 'newsweek-topic'` mark sites with no
-// RSS feed whose listing page is scraped instead.
-type FeedFormat = 'rss' | 'mandell-html' | 'newsweek-topic'
+// `format: 'mandell-html'`, `format: 'newsweek-topic'` and the law-firm formats
+// (`dwt-insights`, `ballard-insights`, `cahill-news`, `duane-morris-pubs`) mark
+// sites with no RSS feed whose listing page (or its data file) is read instead.
+type FeedFormat =
+  | 'rss'
+  | 'mandell-html'
+  | 'newsweek-topic'
+  | 'dwt-insights'
+  | 'ballard-insights'
+  | 'cahill-news'
+  | 'duane-morris-pubs'
 
 // Matches stories on the site's beat. General-news feeds set `onTopic: true`
 // so only their media, speech, privacy and entertainment stories are kept.
+// `onTopic: 'strict'` (used for law-firm news pages) checks only the title and
+// summary, because firm labels such as "In the Media" or "Media Coverage"
+// would otherwise let every item through.
 const ON_TOPIC = /\b(first amendment|free speech|free press|freedom of (the )?press|press freedom|speech|censor\w*|defamation|defam\w+|libel\w*|slander|privacy|surveillance|copyright\w*|trademark\w*|right of publicity|intellectual property|entertainment|music\w*|musician|record label|film\w*|movie\w*|hollywood|studio|streaming|broadcast\w*|television|tv|netflix|disney|journalis\w+|reporters?|newspapers?|news media|media|publish\w*|social media|section 230|book ban\w*|celebrit\w+|actors?|actress|singer|rapper|artists?|sag-aftra|iatse|anti-slapp|foia|public records)\b/i
 
 // `linkPrefix` keeps only stories whose link starts with that URL, for
 // sections that have no feed of their own but appear in a broader one.
-export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?: boolean; linkPrefix?: string }[] = [
+export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?: boolean | 'strict'; linkPrefix?: string }[] = [
   { url: 'https://www.scotusblog.com/feed/', source: 'SCOTUSblog' },
   { url: 'https://firstamendmentwatch.org/feed/', source: 'First Amendment Watch' },
   // Official RSS for nytimes.com/topic/subject/first-amendment-us-constitution
@@ -66,6 +77,19 @@ export const FEEDS: { url: string; source: string; format?: FeedFormat; onTopic?
   { url: 'https://www.tmz.com/category/legal/rss.xml', source: 'TMZ Legal' },
   // TheWrap has only a site-wide feed (no legal category feed), so it is filtered to on-topic stories.
   { url: 'https://www.thewrap.com/feed/', source: 'TheWrap', onTopic: true },
+  // Law firm news and insights. These firms publish on every practice area,
+  // so each is filtered to stories on the site's beat.
+  // Davis Wright Tremaine insights listing (no RSS); the page embeds its results as JSON.
+  { url: 'https://www.dwt.com/insights?islanding=true&searchtype=12&take=25', source: 'Davis Wright Tremaine', format: 'dwt-insights', onTopic: 'strict' },
+  // Ballard Spahr insights listing (no RSS), scraped from the page.
+  { url: 'https://www.ballardspahr.com/insights', source: 'Ballard Spahr', format: 'ballard-insights', onTopic: 'strict' },
+  // Gibson Dunn's WordPress feed narrowed to the Accolades, Firm News and In the
+  // Media categories shown on its insights archive page.
+  { url: 'https://www.gibsondunn.com/feed/?category_name=accolades,firm-news,in-the-media', source: 'Gibson Dunn', onTopic: 'strict' },
+  // Cahill Gordon & Reindel recent news (no RSS), scraped from the page.
+  { url: 'https://www.cahill.com/news', source: 'Cahill Gordon & Reindel', format: 'cahill-news', onTopic: 'strict' },
+  // Duane Morris "Recent News and Publications" page loads this JSON listing.
+  { url: 'https://www.duanemorris.com/resources/data/publicationlistings_ALLSHORT.json', source: 'Duane Morris', format: 'duane-morris-pubs', onTopic: 'strict' },
 ]
 
 const MAX_ITEMS_PER_FEED = 25
@@ -271,6 +295,114 @@ function parseNewsweekTopic(html: string): FeedItem[] {
   return finishItems(items)
 }
 
+// Upcoming events (speaking engagements, webinars) carry future dates; they
+// are left out so they don't sit at the top of the news feed.
+function notUpcoming(items: FeedItem[]): FeedItem[] {
+  const now = Date.now()
+  return items.filter((item) => !item.pubDate || new Date(item.pubDate).getTime() <= now)
+}
+
+function requireItems(items: FeedItem[], source: string): FeedItem[] {
+  if (!items.length) throw new Error(`No stories found on the ${source} page`)
+  return items
+}
+
+// Davis Wright Tremaine (dwt.com/insights): the results are a JSON object in
+// the `v-bind:initial-state` attribute of the insights-search component.
+// Dates are MM.DD.YY.
+function parseDwtInsights(html: string, pageUrl: string): FeedItem[] {
+  const attr = html.match(/v-bind:initial-state="([^"]*)"/)
+  if (!attr) throw new Error('No insights data found on the DWT page')
+  const state = JSON.parse(decodeEntities(attr[1]))
+  const results: any[] = state?.response?.results ?? []
+  const items = results.map((r): FeedItem => {
+    const d = String(r.date ?? '').match(/^(\d{2})\.(\d{2})\.(\d{2})$/)
+    return {
+      title: plainText(r.title),
+      link: r.link?.Url ? new URL(r.link.Url, pageUrl).toString() : '',
+      pubDate: d ? toIso(`20${d[3]}-${d[1]}-${d[2]}T12:00:00Z`) : '',
+      author: 'Davis Wright Tremaine',
+      description: plainText(r.abstractText ?? ''),
+      categories: [r.type, r.category].map((c) => plainText(c ?? '')).filter(Boolean),
+    }
+  })
+  return finishItems(notUpcoming(requireItems(items, 'DWT insights')))
+}
+
+// "March 2 12:00 PM - March 6 4:30 PM, 2027" or "November 24, 2026" -> first day.
+function firstDate(text: string): string {
+  const m = text.match(/([A-Z][a-z]+)\s+(\d{1,2})\b/)
+  const year = text.match(/\b(\d{4})\b/)
+  return m && year ? toIso(`${m[1]} ${m[2]}, ${year[1]} 12:00 UTC`) : ''
+}
+
+// Ballard Spahr (ballardspahr.com/insights): each result is a list item with an
+// eyebrow ("Type | Date"), a title link and an abstract.
+function parseBallardInsights(html: string, pageUrl: string): FeedItem[] {
+  const card =
+    /SearchResultListItem__eyebrow">([\s\S]*?)<\/div>\s*<a\b[^>]*href="([^"]+)"[^>]*>\s*<div class="SearchResultListItem__title">([\s\S]*?)<\/div>\s*<\/a>\s*(?:<div class="SearchResultListItem__abstract">([\s\S]*?)<\/div>)?/gi
+  const items: FeedItem[] = []
+  for (const m of html.matchAll(card)) {
+    const [type, ...rest] = plainText(m[1]).split('|').map((s) => s.trim())
+    items.push({
+      title: plainText(m[3]),
+      link: new URL(m[2], pageUrl).toString(),
+      pubDate: firstDate(rest.join(' ')),
+      author: 'Ballard Spahr',
+      description: plainText(m[4] ?? ''),
+      categories: type ? [type] : [],
+    })
+  }
+  return finishItems(notUpcoming(requireItems(items, 'Ballard Spahr insights')))
+}
+
+// Cahill (cahill.com/news): a list of items, each with a type and date line
+// followed by the title link. There is no summary on the listing page.
+function parseCahillNews(html: string, pageUrl: string): FeedItem[] {
+  const card =
+    /<span class="type-date"><a\b[^>]*class="news-type"[^>]*>([\s\S]*?)<\/a>([\s\S]*?)<\/span>\s*<a\b[^>]*href="([^"]+)"[^>]*class="title"[^>]*>([\s\S]*?)<\/a>/gi
+  const items: FeedItem[] = []
+  const seen = new Set<string>()
+  for (const m of html.matchAll(card)) {
+    const link = new URL(m[3], pageUrl).toString()
+    if (seen.has(link)) continue
+    seen.add(link)
+    items.push({
+      title: plainText(m[4]),
+      link,
+      pubDate: firstDate(plainText(m[2])),
+      author: 'Cahill Gordon & Reindel',
+      description: '',
+      categories: [plainText(m[1])].filter(Boolean),
+    })
+  }
+  return finishItems(notUpcoming(requireItems(items, 'Cahill news')))
+}
+
+// Duane Morris (duanemorris.com/site/listings/recentnewsandpubs.html) renders
+// its list from this JSON file: headline, epoch-ms issue date and an HTML link.
+const DUANE_MORRIS_TYPES: Record<string, string> = {
+  BLA: 'Article', CLA: 'Alert', CLP: 'In the News', PRL: 'Press Release',
+}
+
+function parseDuaneMorrisPubs(body: string, pageUrl: string): FeedItem[] {
+  const data = JSON.parse(body)
+  const list: any[] = Array.isArray(data?.items) ? data.items : []
+  const items = list.map((p): FeedItem => {
+    const href = String(p.linkDescription ?? '').match(/href=['"]([^'"]+)['"]/)
+    const date = Number(p.issueDate)
+    return {
+      title: plainText(p.headline),
+      link: href ? new URL(decodeEntities(href[1]), pageUrl).toString() : '',
+      pubDate: Number.isFinite(date) && date > 0 ? new Date(date).toISOString() : toIso(p.issueDateText),
+      author: plainText(p.authorText ?? '').replace(/^By\s+/i, '') || 'Duane Morris',
+      description: '',
+      categories: [DUANE_MORRIS_TYPES[p.type] ?? '', plainText(p.reprintSource?.name ?? '')].filter(Boolean),
+    }
+  })
+  return finishItems(notUpcoming(requireItems(items, 'Duane Morris')))
+}
+
 async function fetchOne(url: string, format: FeedFormat = 'rss', linkPrefix?: string): Promise<FeedItem[]> {
   const res = await fetch(url, {
     redirect: 'follow',
@@ -286,6 +418,10 @@ async function fetchOne(url: string, format: FeedFormat = 'rss', linkPrefix?: st
   const body = await res.text()
   if (format === 'mandell-html') return parseMandellNews(body, url)
   if (format === 'newsweek-topic') return parseNewsweekTopic(body)
+  if (format === 'dwt-insights') return parseDwtInsights(body, url)
+  if (format === 'ballard-insights') return parseBallardInsights(body, url)
+  if (format === 'cahill-news') return parseCahillNews(body, url)
+  if (format === 'duane-morris-pubs') return parseDuaneMorrisPubs(body, 'https://www.duanemorris.com/')
   return parseFeed(body, linkPrefix)
 }
 
@@ -308,7 +444,8 @@ export async function refreshFeeds(): Promise<Snapshot> {
     FEEDS.map(async ({ url, source, format, onTopic, linkPrefix }): Promise<FeedResult> => {
       try {
         let items = await fetchOne(url, format, linkPrefix)
-        if (onTopic) items = items.filter((i) => ON_TOPIC.test(`${i.title} ${i.description.slice(0, 600)} ${i.categories.join(' ')}`))
+        if (onTopic === 'strict') items = items.filter((i) => ON_TOPIC.test(`${i.title} ${i.description.slice(0, 600)}`))
+        else if (onTopic) items = items.filter((i) => ON_TOPIC.test(`${i.title} ${i.description.slice(0, 600)} ${i.categories.join(' ')}`))
         return { url, source, status: 'ok', fetchedAt: now, checkedAt: now, items }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)

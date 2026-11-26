@@ -466,9 +466,14 @@
             { url: 'https://www.forbes.com/business/feed/', source: 'Forbes', category: 'media-law' },
             { url: 'https://www.forbes.com/innovation/feed/', source: 'Forbes', category: 'media-law' },
             { url: 'https://www.tmz.com/category/legal/rss.xml', source: 'TMZ Legal', category: 'entertainment' },
-            { url: 'https://www.thewrap.com/feed/', source: 'TheWrap', category: 'entertainment' }
+            { url: 'https://www.thewrap.com/feed/', source: 'TheWrap', category: 'entertainment' },
+            { url: 'https://www.dwt.com/insights?islanding=true&searchtype=12&take=25', source: 'Davis Wright Tremaine', category: 'media-law' },
+            { url: 'https://www.ballardspahr.com/insights', source: 'Ballard Spahr', category: 'media-law' },
+            { url: 'https://www.gibsondunn.com/feed/?category_name=accolades,firm-news,in-the-media', source: 'Gibson Dunn', category: 'media-law' },
+            { url: 'https://www.cahill.com/news', source: 'Cahill Gordon & Reindel', category: 'first-amendment' },
+            { url: 'https://www.duanemorris.com/resources/data/publicationlistings_ALLSHORT.json', source: 'Duane Morris', category: 'media-law' }
         ];
-        const FEED_CACHE_KEY = 'media-law-news-live-v14';
+        const FEED_CACHE_KEY = 'media-law-news-live-v15';
         const FEED_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
         const CATEGORY_LABELS = {
@@ -738,8 +743,10 @@
             RSS_FEEDS.forEach(feed => {
                 const result = byUrl.get(feed.url);
                 if (result && result.status !== 'ok') console.warn(`[Media Law News] Feed failed: ${feed.source}`, result.message);
+                // A source is active when its feed is responding, even if it has
+                // no on-topic stories right now (law-firm pages are filtered).
+                if (result && (result.status === 'ok' || (result.items && result.items.length))) activeSources.add(feed.source);
                 if (result && result.items && result.items.length) {
-                    activeSources.add(feed.source);
                     liveItems = liveItems.concat(feedItemsToNews(feed, result.items));
                 }
             });
