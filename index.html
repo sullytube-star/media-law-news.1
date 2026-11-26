@@ -465,8 +465,6 @@
             { url: 'https://abovethelaw.com/feed/', source: 'Above the Law', category: 'media-law' },
             { url: 'https://feeds.content.dowjones.io/public/rss/RSSUSnews', source: 'Wall Street Journal · Law', category: 'media-law' },
             { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', source: 'New York Times', category: 'media-law' },
-            { url: 'https://www.forbes.com/business/feed/', source: 'Forbes', category: 'media-law' },
-            { url: 'https://www.forbes.com/innovation/feed/', source: 'Forbes', category: 'media-law' },
             { url: 'https://www.tmz.com/category/legal/rss.xml', source: 'TMZ Legal', category: 'entertainment' },
             { url: 'https://www.dwt.com/insights?islanding=true&searchtype=12&take=25', source: 'Davis Wright Tremaine', category: 'media-law' },
             { url: 'https://www.ballardspahr.com/insights', source: 'Ballard Spahr', category: 'media-law' },
@@ -741,7 +739,7 @@
             }
             const byUrl = new Map(snapshotFeeds.map(f => [f.url, f]));
             let liveItems = [];
-            // Some publishers (e.g. Forbes) span several feeds; count each name once.
+            // Some publishers span several feeds; count each name once.
             const activeSources = new Set();
             RSS_FEEDS.forEach(feed => {
                 const result = byUrl.get(feed.url);
